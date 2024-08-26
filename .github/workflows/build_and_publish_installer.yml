@@ -34,7 +34,7 @@ jobs:
           advinst-enable-automation: 'true'
           aip-path: ${{ github.workspace }}\coIT.Toolkit.QuickActions.Installer.aip
           aip-build-name: DefaultBuild
-          aip-package-name: coIT.Toolkit.QuickActionsInstaller-${{github.ref_name}}.msi
+          aip-package-name: coIT.Toolkit.QuickActions.Installer-${{github.ref_name}}.msi
           aip-output-dir:  ${{ github.workspace }}\setup
           aip-commands: |
             SetVersion ${{github.ref_name}}
