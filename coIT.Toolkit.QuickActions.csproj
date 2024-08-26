@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BaseOutputPath>..\..\build\coIT.Clockodo.QuickActions</BaseOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coIT.Libraries.Clockodo" Version="1.0.0" />
+    <PackageReference Include="coIT.Libraries.ClockodoBusinessRules" Version="1.0.0" />
+    <PackageReference Include="coIT.Libraries.ConfigurationManager" Version="1.0.0" />
+    <PackageReference Include="coIT.Libraries.LexOffice" Version="1.0.0" />
+    <PackageReference Include="coIT.Libraries.Lexoffice.BusinessRules" Version="1.0.0" />
+    <PackageReference Include="coIT.Libraries.Toolkit.Datengrundlagen" Version="1.0.0" />
+    <PackageReference Include="coIT.Libraries.WinForms" Version="1.0.0" />
+    <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="img\installer_banner.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="img\installer_dialog.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="img\program_icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
