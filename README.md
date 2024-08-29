@@ -1,17 +1,29 @@
-#coIT.Quickactions
-* Noch in Arbeit!
+# Einrichtung
 
-Über WinForms Applikation kann man sich Zeiteinträge von Clockodo auflisten lassen und diese Bearbeiten 
+Um die notwendigen Packages aus dem privaten Package-Manager der co-IT aus GitHub zu laden, wird eine eigene `nuget.config` benötigt.
 
-###Filter
+1. Stelle sicher, dass die [GitHub Cli](https://cli.github.com/) bei dir installiert ist ([winget](https://github.com/microsoft/winget-cli))
+2. Falls du bisher noch nie eine `nuget.config` anlegen musstest führe `gh auth login --scopes read:packages` aus und verknüpfge deinen GitHub Account
+3. Lege eine `nuget.config` Datei mit dem folgenden Inhalt an
 
+```
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <packageSources>
+        <clear />
+        <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+        <add key="github" value="https://nuget.pkg.github.com/co-IT/index.json" />
+    </packageSources>
+    <packageSourceCredentials>
+        <github>
+            <add key="Username" value="{Nutzername}" />
+            <add key="ClearTextPassword" value="{Token}" />
+        </github>
+    </packageSourceCredentials>
+</configuration>
+```
 
-###Konfiguration
-Über die QuickActionSettings Klasse wird über die Credentials eine verbindung zu der API von Clockodo aufgebaut. Hier wird die EmailAdresse und der API Token über eine JSON eingelesen
+4. Führe `gh api user -q ".login"` aus und ersetze `{Nutzername}` in der `nuget.config` mit dem Ergebnis
+5. Führe `gh auth token` aus und ersetze `{Token}` in der `nuget.config` mit dem Ergebnis
 
-
-###Extern benutzte Projekte/Libraries
-
-Benutzt folgende Libraries
-* coIT.Libraries.Clockodo
-* coIT.Libraries.WinForms
+In Zukunft, kannst du diese `nuget.config` auch für andere Tools und Projekte nutzen, die Zugriff auf den co-IT GitHub package manager benötigen und musst nicht mehr den Schritten von oben folgen
