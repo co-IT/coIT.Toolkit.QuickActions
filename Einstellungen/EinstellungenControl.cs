@@ -163,8 +163,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
 
         private async Task<Result> LexofficeEinstellungenLaden()
         {
-            var filesystemManager = new FileSystemManager();
-
             var lexofficeKeyGesetzt = await _environmentManager.Get<LexofficeKonfiguration>();
 
             if (!lexofficeKeyGesetzt.IsSuccess)
@@ -175,34 +173,12 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             _lexofficeKonfiguration = lexofficeKeyGesetzt.Value;
             tbxLexofficeApiToken.Text = _lexofficeKonfiguration.LexofficeKey;
 
-            var dateiPfadeRichtigGesetzt = Result
-                .Success()
-                .Bind(filesystemManager.GetPathFor<Kundenstamm>)
-                .BindZip((_) => filesystemManager.GetPathFor<UmsatzkontenListe>())
-                .BindZip((_, _) => filesystemManager.GetPathFor<MitarbeiterListe>());
-
-            if (dateiPfadeRichtigGesetzt.IsFailure)
-                return Result.Failure(
-                    $"Es muss eine Konfiguration für Lexoffice durchgeführt werden"
-                );
-
-            var (kundenstammPfad, umsatzkontenPfad, mitarbeiterPfad) =
-                dateiPfadeRichtigGesetzt.Value;
-
-            tbxKundenstamm.Text = kundenstammPfad;
-            tbxUmsatzkonten.Text = umsatzkontenPfad;
-            tbxMitarbeiter.Text = mitarbeiterPfad;
-
             return Result.Success();
         }
 
         private async Task<Result> LexofficeEinstellungenSpeichern()
         {
             var lexofficeToken = tbxLexofficeApiToken.Text;
-
-            var kundenstamm = tbxKundenstamm.Text;
-            var umsatzkonten = tbxUmsatzkonten.Text;
-            var mitarbeiter = tbxMitarbeiter.Text;
 
             var konfiguration = new LexofficeKonfiguration(lexofficeToken);
 
@@ -212,11 +188,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
 #else
             var konfigurationSpeichernErgebnis = Result.Success();
 #endif
-
-            konfigurationSpeichernErgebnis = await konfigurationSpeichernErgebnis
-                .Bind(() => _fileSystemManager.SavePathFor<Kundenstamm>(kundenstamm))
-                .Bind(() => _fileSystemManager.SavePathFor<UmsatzkontenListe>(umsatzkonten))
-                .Bind(() => _fileSystemManager.SavePathFor<MitarbeiterListe>(mitarbeiter));
 
             if (konfigurationSpeichernErgebnis.IsFailure)
             {
@@ -236,41 +207,12 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             return Result.Success();
         }
 
-        private void btnKundenstamm_Click(object sender, EventArgs e)
-        {
-            TextBoxSelectorKomboHandlen(dlgKundenstamm, tbxKundenstamm);
-        }
-
-        private void btnUmsatzkonten_Click(object sender, EventArgs e)
-        {
-            TextBoxSelectorKomboHandlen(dlgUmsatzkonten, tbxUmsatzkonten);
-        }
-
-        private void btnMitarbeiter_Click(object sender, EventArgs e)
-        {
-            TextBoxSelectorKomboHandlen(dlgMitarbeiter, tbxMitarbeiter);
-        }
-
-        private void TextBoxSelectorKomboHandlen(OpenFileDialog dialog, TextBox box)
-        {
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                var filePath = dialog.FileName;
-                box.Text = filePath;
-            }
-        }
-
         private void LinkInBrowserÖffnen(string link)
         {
             Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
         }
 
         private void lnkClockodo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            LinkInBrowserÖffnen(((Control)sender).Text);
-        }
-
-        private void lnkOneDrive_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             LinkInBrowserÖffnen(((Control)sender).Text);
         }

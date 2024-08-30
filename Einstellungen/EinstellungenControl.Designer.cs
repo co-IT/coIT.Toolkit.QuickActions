@@ -32,15 +32,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             groupBox6 = new GroupBox();
             btnLexofficeEinstellungenSpeichern = new Button();
             gbxDatengrundlagenKonfigurieren = new GroupBox();
-            btnMitarbeiter = new Button();
-            tbxMitarbeiter = new TextBox();
-            label6 = new Label();
-            btnUmsatzkonten = new Button();
-            tbxUmsatzkonten = new TextBox();
-            label7 = new Label();
-            btnKundenstamm = new Button();
-            tbxKundenstamm = new TextBox();
-            label8 = new Label();
             gbxLexofficeKonfigurieren = new GroupBox();
             lblLexofficeApiToken = new Label();
             tbxLexofficeApiToken = new TextBox();
@@ -59,12 +50,12 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             tbpClockodo = new TabPage();
             tbpLexoffice = new TabPage();
             groupBox5 = new GroupBox();
-            label4 = new Label();
             label2 = new Label();
-            lnkOneDrive = new LinkLabel();
             dlgKundenstamm = new OpenFileDialog();
             dlgUmsatzkonten = new OpenFileDialog();
             dlgMitarbeiter = new OpenFileDialog();
+            label6 = new Label();
+            tbxDatengrundlageConnectionString = new TextBox();
             groupBox6.SuspendLayout();
             gbxDatengrundlagenKonfigurieren.SuspendLayout();
             gbxLexofficeKonfigurieren.SuspendLayout();
@@ -103,102 +94,14 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             // 
             // gbxDatengrundlagenKonfigurieren
             // 
-            gbxDatengrundlagenKonfigurieren.Controls.Add(btnMitarbeiter);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(tbxMitarbeiter);
+            gbxDatengrundlagenKonfigurieren.Controls.Add(tbxDatengrundlageConnectionString);
             gbxDatengrundlagenKonfigurieren.Controls.Add(label6);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(btnUmsatzkonten);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(tbxUmsatzkonten);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(label7);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(btnKundenstamm);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(tbxKundenstamm);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(label8);
             gbxDatengrundlagenKonfigurieren.Location = new Point(553, 29);
             gbxDatengrundlagenKonfigurieren.Name = "gbxDatengrundlagenKonfigurieren";
             gbxDatengrundlagenKonfigurieren.Size = new Size(557, 227);
             gbxDatengrundlagenKonfigurieren.TabIndex = 12;
             gbxDatengrundlagenKonfigurieren.TabStop = false;
             gbxDatengrundlagenKonfigurieren.Text = "Datengrundlagen Konfigurieren";
-            // 
-            // btnMitarbeiter
-            // 
-            btnMitarbeiter.Location = new Point(438, 176);
-            btnMitarbeiter.Name = "btnMitarbeiter";
-            btnMitarbeiter.Size = new Size(106, 31);
-            btnMitarbeiter.TabIndex = 8;
-            btnMitarbeiter.Text = "Auswählen";
-            btnMitarbeiter.UseVisualStyleBackColor = true;
-            btnMitarbeiter.Click += btnMitarbeiter_Click;
-            // 
-            // tbxMitarbeiter
-            // 
-            tbxMitarbeiter.Location = new Point(157, 177);
-            tbxMitarbeiter.Name = "tbxMitarbeiter";
-            tbxMitarbeiter.ReadOnly = true;
-            tbxMitarbeiter.Size = new Size(255, 30);
-            tbxMitarbeiter.TabIndex = 7;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new Point(15, 180);
-            label6.Name = "label6";
-            label6.Size = new Size(94, 23);
-            label6.TabIndex = 6;
-            label6.Text = "Mitarbeiter";
-            // 
-            // btnUmsatzkonten
-            // 
-            btnUmsatzkonten.Location = new Point(438, 111);
-            btnUmsatzkonten.Name = "btnUmsatzkonten";
-            btnUmsatzkonten.Size = new Size(106, 31);
-            btnUmsatzkonten.TabIndex = 5;
-            btnUmsatzkonten.Text = "Auswählen";
-            btnUmsatzkonten.UseVisualStyleBackColor = true;
-            btnUmsatzkonten.Click += btnUmsatzkonten_Click;
-            // 
-            // tbxUmsatzkonten
-            // 
-            tbxUmsatzkonten.Location = new Point(157, 112);
-            tbxUmsatzkonten.Name = "tbxUmsatzkonten";
-            tbxUmsatzkonten.ReadOnly = true;
-            tbxUmsatzkonten.Size = new Size(255, 30);
-            tbxUmsatzkonten.TabIndex = 4;
-            // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Location = new Point(15, 115);
-            label7.Name = "label7";
-            label7.Size = new Size(120, 23);
-            label7.TabIndex = 3;
-            label7.Text = "Umsatzkonten";
-            // 
-            // btnKundenstamm
-            // 
-            btnKundenstamm.Location = new Point(438, 46);
-            btnKundenstamm.Name = "btnKundenstamm";
-            btnKundenstamm.Size = new Size(106, 31);
-            btnKundenstamm.TabIndex = 2;
-            btnKundenstamm.Text = "Auswählen";
-            btnKundenstamm.UseVisualStyleBackColor = true;
-            btnKundenstamm.Click += btnKundenstamm_Click;
-            // 
-            // tbxKundenstamm
-            // 
-            tbxKundenstamm.Location = new Point(157, 47);
-            tbxKundenstamm.Name = "tbxKundenstamm";
-            tbxKundenstamm.ReadOnly = true;
-            tbxKundenstamm.Size = new Size(255, 30);
-            tbxKundenstamm.TabIndex = 1;
-            // 
-            // label8
-            // 
-            label8.AutoSize = true;
-            label8.Location = new Point(15, 50);
-            label8.Name = "label8";
-            label8.Size = new Size(111, 23);
-            label8.TabIndex = 0;
-            label8.Text = "Kundestamm";
             // 
             // gbxLexofficeKonfigurieren
             // 
@@ -374,23 +277,13 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             // 
             // groupBox5
             // 
-            groupBox5.Controls.Add(label4);
             groupBox5.Controls.Add(label2);
-            groupBox5.Controls.Add(lnkOneDrive);
             groupBox5.Location = new Point(6, 354);
             groupBox5.Name = "groupBox5";
-            groupBox5.Size = new Size(1130, 237);
+            groupBox5.Size = new Size(1130, 113);
             groupBox5.TabIndex = 11;
             groupBox5.TabStop = false;
             groupBox5.Text = "Anleitung";
-            // 
-            // label4
-            // 
-            label4.Location = new Point(13, 187);
-            label4.Name = "label4";
-            label4.Size = new Size(885, 50);
-            label4.TabIndex = 6;
-            label4.Text = "3. Nachdem die Synchronisierung aktiviert ist kannst du links die Pfade zu den Dateien angeben";
             // 
             // label2
             // 
@@ -399,16 +292,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             label2.Size = new Size(1042, 55);
             label2.TabIndex = 5;
             label2.Text = resources.GetString("label2.Text");
-            // 
-            // lnkOneDrive
-            // 
-            lnkOneDrive.Location = new Point(41, 110);
-            lnkOneDrive.Name = "lnkOneDrive";
-            lnkOneDrive.Size = new Size(1024, 53);
-            lnkOneDrive.TabIndex = 1;
-            lnkOneDrive.TabStop = true;
-            lnkOneDrive.Text = "https://coiteu-my.sharepoint.com/:f:/g/personal/uli_armbruster_co-it_eu/EnbEqLDuNlZAnnV6MGxMx6EBeM6ixAofXa4avDMWP9whZA?e=iw8ODp";
-            lnkOneDrive.LinkClicked += lnkOneDrive_LinkClicked;
             // 
             // dlgKundenstamm
             // 
@@ -424,6 +307,22 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             // 
             dlgMitarbeiter.FileName = "openFileDialog3";
             dlgMitarbeiter.Filter = "json Files|*.json";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(20, 45);
+            label6.Name = "label6";
+            label6.Size = new Size(492, 23);
+            label6.TabIndex = 0;
+            label6.Text = "Datengrundlagen Connection String (wird automatisch gesetzt)";
+            // 
+            // tbxDatengrundlageConnectionString
+            // 
+            tbxDatengrundlageConnectionString.Location = new Point(20, 71);
+            tbxDatengrundlageConnectionString.Name = "tbxDatengrundlageConnectionString";
+            tbxDatengrundlageConnectionString.Size = new Size(492, 30);
+            tbxDatengrundlageConnectionString.TabIndex = 1;
             // 
             // EinstellungenControl
             // 
@@ -473,22 +372,13 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
         private TabPage tbpLexoffice;
         private GroupBox groupBox5;
         private Label label2;
-        private LinkLabel lnkOneDrive;
-        private Label label4;
         private GroupBox gbxDatengrundlagenKonfigurieren;
-        private Button btnMitarbeiter;
-        private TextBox tbxMitarbeiter;
-        private Label label6;
-        private Button btnUmsatzkonten;
-        private TextBox tbxUmsatzkonten;
-        private Label label7;
-        private Button btnKundenstamm;
-        private TextBox tbxKundenstamm;
-        private Label label8;
         private Label lblLexofficeApiToken;
         private OpenFileDialog dlgKundenstamm;
         private OpenFileDialog dlgUmsatzkonten;
         private OpenFileDialog dlgMitarbeiter;
         private Button btnLexofficeEinstellungenSpeichern;
+        private TextBox tbxDatengrundlageConnectionString;
+        private Label label6;
     }
 }
