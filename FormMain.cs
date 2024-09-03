@@ -10,10 +10,14 @@ using coIT.Libraries.ClockodoBusinessRules;
 using coIT.Libraries.ConfigurationManager;
 using coIT.Libraries.ConfigurationManager.Cryptography;
 using coIT.Libraries.ConfigurationManager.Serialization;
+using coIT.Libraries.Toolkit.Datengrundlagen.KundenRelation;
+using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
+using coIT.Libraries.Toolkit.Datengrundlagen.Umsatzkonten;
 using coIT.Libraries.WinForms;
 using coIT.Libraries.WinForms.DateTimeButtons;
 using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen;
+using CSharpFunctionalExtensions;
 
 namespace coIT.Clockodo.QuickActions;
 
@@ -21,7 +25,6 @@ public partial class FormMain : Form
 {
     private AccountInformation _accountInformation;
     private ClockodoEinstellungen _clockodoSettings;
-    private LexofficeKonfiguration _lexofficeKonfiguration;
     private EnvironmentManager _environmentManager;
     private FileSystemManager _fileSystemManager;
 
@@ -41,18 +44,17 @@ public partial class FormMain : Form
     private void EinstellungenSetzen(object sender, EinstellungenGeladenEventArgs einstellungen)
     {
         _clockodoSettings = einstellungen.ClockodoEinstellungen;
-        _lexofficeKonfiguration = einstellungen.LexofficeEinstellungen;
         DatenNeuladen();
         UhrAktualisierungsTimerStarten();
         TabStatusSetzen(true, true);
     }
 
-    private void FormMain_Load(object sender, EventArgs e)
+    private async void FormMain_Load(object sender, EventArgs e)
     {
         this.Visible = false;
         KonfigurationManagerLaden();
         EinstellungenLaden();
-        LexofficeTabLaden();
+        await LexofficeTabLaden();
 
         // Wird derzeit nicht benötigt und würde Anwender verwirren
         tbcForms.Controls.Remove(tbpErfassen);
@@ -63,18 +65,52 @@ public partial class FormMain : Form
         StandardZeitraumSetzen();
     }
 
-    private void LexofficeTabLaden()
+    private async Task LexofficeTabLaden()
     {
-        var lexofficeTab = new LexofficeTabControl(_fileSystemManager, _environmentManager);
-        tbpLexoffice.Controls.Add(lexofficeTab);
-        lexofficeTab.Dock = DockStyle.Fill;
+        var konfigurationLadenErgebnis = await _environmentManager.Get<AzureTableKonfiguration>(
+            "COIT_TOOLKIT_DATABASE_CONNECTIONSTRING"
+        );
+
+        if (konfigurationLadenErgebnis.IsFailure)
+        {
+            MessageBox.Show(
+                "Konfiguration für Azure Verbindung konnte nicht geladen werden",
+                "Fehler",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+            return;
+        }
+
+        konfigurationLadenErgebnis
+            .Map(konfiguration =>
+            {
+                return (
+                    MitarbeiterRepository: new MitarbeiterDataTableRepository(
+                        konfiguration.ConnectionString
+                    ),
+                    KundenRelationRepository: new KundenRelationDataTableRepository(
+                        konfiguration.ConnectionString
+                    ),
+                    UmsatzkontoRepository: new UmsatzkontoDataTableRepository(
+                        konfiguration.ConnectionString
+                    )
+                );
+            })
+            .Map(repositories => new LexofficeTabControl(
+                _environmentManager,
+                repositories.MitarbeiterRepository,
+                repositories.KundenRelationRepository,
+                repositories.UmsatzkontoRepository
+            ))
+            .Tap(tbpLexoffice.Controls.Add)
+            .Tap(control => control.Dock = DockStyle.Fill);
     }
 
     private void EinstellungenLaden()
     {
         var einstellungenControl = new EinstellungenControl(
-            _environmentManager,
-            _fileSystemManager
+            _environmentManager
         );
 
         tbpEinstellungen.Controls.Add(einstellungenControl);
@@ -92,7 +128,7 @@ public partial class FormMain : Form
     private void KonfigurationManagerLaden()
     {
         var key =
-            "eyJJdGVtMSI6IlZSZG1iaEJEVnF6U0swbTBHYjBEUFREdWU5c01sSmNNeURwOE1qb1VKTjg9IiwiSXRlbTIiOiJubE00WEJsTkZGTWFDVFd3Si9EdEZRPT0ifQ==";
+            "eyJJdGVtMSI6InlLdHdrUDJraEJRbTRTckpEaXFjQWpkM3pBc3NVdG8rSUNrTmFwYUgwbWs9IiwiSXRlbTIiOiJUblRxT1RUbXI3ajBCZlUwTEtnOS9BPT0ifQ==";
         var aesCryptography = AesCryptographyService.FromKey(key).Value;
         var jsonSerializer = new NewtonsoftJsonSerializer();
 

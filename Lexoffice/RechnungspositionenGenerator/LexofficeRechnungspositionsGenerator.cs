@@ -1,7 +1,9 @@
+using System;
 using coIT.Libraries.Clockodo.TimeEntries;
 using coIT.Libraries.Clockodo.TimeEntries.Contracts;
 using coIT.Libraries.ConfigurationManager;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
+using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen;
 using coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator;
 using CSharpFunctionalExtensions;
@@ -10,18 +12,18 @@ namespace coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator
 {
     public partial class LexofficeRechnungspositionsGenerator : UserControl
     {
-        private readonly FileSystemManager _fileSystemManager;
         private readonly EnvironmentManager _environmentManager;
+        private readonly IMitarbeiterRepository _mitarbeiterRepository;
         private List<Mitarbeiter> _mitarbeiterListe = new();
 
         public LexofficeRechnungspositionsGenerator(
-            FileSystemManager fileSystemManager,
-            EnvironmentManager environmentManager
+            EnvironmentManager environmentManager,
+            IMitarbeiterRepository mitarbeiterRepository
         )
         {
             InitializeComponent();
-            _fileSystemManager = fileSystemManager;
             _environmentManager = environmentManager;
+            _mitarbeiterRepository = mitarbeiterRepository;
         }
 
         private async void LexofficeRechnungspositionsGenerator_Load(object sender, EventArgs e)
@@ -46,17 +48,12 @@ namespace coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator
                 .Map((einstellungen) => new TimeEntriesService(einstellungen.ClockodoCredentials))
                 .Map((clockodoService) => clockodoService.GetAllUsers())
                 .Map((clockodoMitarbeiter) => clockodoMitarbeiter.ToList())
-                .BindZip((_) => _fileSystemManager.Get<MitarbeiterListe>())
-                .Map(
-                    (
-                        (
-                            List<UserWithTeam> ClockodoMitarbeiter,
-                            MitarbeiterListe MitarbeiterListe
-                        ) ergebnisse
-                    ) =>
-                        ergebnisse.MitarbeiterListe.ClockodoMitarbeiterHinzufügen(
-                            ergebnisse.ClockodoMitarbeiter
-                        )
+                .BindZip((_) => _mitarbeiterRepository.GetAll())
+                .Map(tuple =>
+                    MitarbeiterMergen.ClockodoMitarbeiterHinzufügen(
+                        tuple.First,
+                        tuple.Second.ToList()
+                    )
                 );
 
             if (mitarbeiterErgebnis.IsSuccess)

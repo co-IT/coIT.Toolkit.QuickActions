@@ -7,9 +7,10 @@ using coIT.Libraries.LexOffice;
 using coIT.Libraries.Lexoffice.BusinessRules;
 using coIT.Libraries.Lexoffice.BusinessRules.Rechnung;
 using coIT.Libraries.LexOffice.DataContracts.Invoice;
-using coIT.Libraries.Toolkit.Datengrundlagen.Konten;
-using coIT.Libraries.Toolkit.Datengrundlagen.Kunden;
+using coIT.Libraries.Toolkit.Datengrundlagen.KundenRelation;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
+using coIT.Libraries.Toolkit.Datengrundlagen.Umsatzkonten;
+using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen;
 using CSharpFunctionalExtensions;
 using CSharpFunctionalExtensions.ValueTasks;
@@ -18,17 +19,23 @@ namespace coIT.Clockodo.QuickActions.Lexoffice
 {
     public partial class LexofficeRechnungskontrolle : UserControl
     {
-        private readonly FileSystemManager _fileSystemManager;
         private readonly EnvironmentManager _environmentManager;
+        private readonly IMitarbeiterRepository _mitarbeiterRepository;
+        private readonly IKundeRepository _kundeRepository;
+        private readonly IKontoRepository _kontoRepository;
 
         public LexofficeRechnungskontrolle(
-            FileSystemManager fileSystemManager,
-            EnvironmentManager environmentManager
+            EnvironmentManager environmentManager,
+            IMitarbeiterRepository mitarbeiterRepository,
+            IKundeRepository kundeRepository,
+            IKontoRepository kontoRepository
         )
         {
             InitializeComponent();
-            _fileSystemManager = fileSystemManager;
             _environmentManager = environmentManager;
+            _mitarbeiterRepository = mitarbeiterRepository;
+            _kundeRepository = kundeRepository;
+            _kontoRepository = kontoRepository;
         }
 
         private async void btnRechnungPrüfen_Click(object sender, EventArgs e)
@@ -104,11 +111,14 @@ namespace coIT.Clockodo.QuickActions.Lexoffice
 
         private async Task<Result<ImmutableList<Mitarbeiter>>> AlleMitarbeiterLaden()
         {
-            return await MitarbeiterAusDateisystemLaden()
+            return await _mitarbeiterRepository
+                .GetAll()
                 .BindZip((_) => MitarbeiterAusClockodoLaden())
                 .Map(
                     (tuple) =>
-                        tuple.First.ClockodoMitarbeiterHinzufügen(tuple.Second).ToImmutableList()
+                        MitarbeiterMergen
+                            .ClockodoMitarbeiterHinzufügen(tuple.Second, tuple.First.ToList())
+                            .ToImmutableList()
                 );
         }
 
@@ -121,23 +131,18 @@ namespace coIT.Clockodo.QuickActions.Lexoffice
                 .Map((mitarbeiter) => mitarbeiter.ToList());
         }
 
-        private async Task<Result<MitarbeiterListe>> MitarbeiterAusDateisystemLaden()
+        private async Task<Result<ImmutableList<Umsatzkonto>>> BekannteKontenLaden()
         {
-            return await _fileSystemManager.Get<MitarbeiterListe>();
-        }
-
-        private async Task<Result<ImmutableList<KontoDetails>>> BekannteKontenLaden()
-        {
-            return await _fileSystemManager
-                .Get<UmsatzkontenListe>()
+            return await _kontoRepository
+                .GetAll()
                 .Map(kontenliste => kontenliste.ToImmutableList());
         }
 
-        private async Task<Result<ImmutableList<Kunde>>> LeistungsempfängerLaden()
+        private async Task<Result<ImmutableList<KundeRelation>>> LeistungsempfängerLaden()
         {
-            return (await _fileSystemManager.Get<Kundenstamm>()).Map(kundenstamm =>
-                kundenstamm.ToImmutableList()
-            );
+            return await _kundeRepository
+                .GetAll()
+                .Map(kundenstamm => kundenstamm.ToImmutableList());
         }
 
         private Result<string> RechnungsIdAuslesen(string text)

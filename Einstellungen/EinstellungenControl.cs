@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using coIT.Libraries.Clockodo.Account;
 using coIT.Libraries.ConfigurationManager;
-using coIT.Libraries.Toolkit.Datengrundlagen.Konten;
-using coIT.Libraries.Toolkit.Datengrundlagen.Kunden;
-using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
+using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen;
 using CSharpFunctionalExtensions;
 
@@ -15,7 +13,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
         private LexofficeKonfiguration _lexofficeKonfiguration;
 
         private EnvironmentManager _environmentManager;
-        private FileSystemManager _fileSystemManager;
 
         internal delegate void EinstellungenGeladenEventHandler(
             object sender,
@@ -28,14 +25,12 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
         internal event EventHandler EinstellungenAktualisierungEnde;
 
         public EinstellungenControl(
-            EnvironmentManager environmentManager,
-            FileSystemManager fileSystemManager
+            EnvironmentManager environmentManager
         )
         {
             InitializeComponent();
 
             _environmentManager = environmentManager;
-            _fileSystemManager = fileSystemManager;
         }
 
         public void Laden()
@@ -164,6 +159,7 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
         private async Task<Result> LexofficeEinstellungenLaden()
         {
             var lexofficeKeyGesetzt = await _environmentManager.Get<LexofficeKonfiguration>();
+            var azureKeyGesetzt = await _environmentManager.Get<AzureTableKonfiguration>();
 
             if (!lexofficeKeyGesetzt.IsSuccess)
                 return Result.Failure(
@@ -172,6 +168,9 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
 
             _lexofficeKonfiguration = lexofficeKeyGesetzt.Value;
             tbxLexofficeApiToken.Text = _lexofficeKonfiguration.LexofficeKey;
+
+            // TODO: Schauen ob wirklich gesetzt, nur noch azure Key nutzen
+            tbxDatengrundlageConnectionString.Text = azureKeyGesetzt.Value.ConnectionString;
 
             return Result.Success();
         }
