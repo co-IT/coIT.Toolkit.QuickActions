@@ -52,7 +52,7 @@ namespace coIT.Clockodo.QuickActions
             lblEnde = new Label();
             dtpZeitraumStart = new DateTimePicker();
             tbpLexoffice = new TabPage();
-            tbpEinstellungen = new TabPage();
+            tabEinstellungen = new TabPage();
             tbpErfassen.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -66,7 +66,6 @@ namespace coIT.Clockodo.QuickActions
             ((System.ComponentModel.ISupportInitialize)dgvClockodoFehler).BeginInit();
             gbxZeitraumSchnellauswahl.SuspendLayout();
             gbxZeitraum.SuspendLayout();
-            tbpLexoffice.SuspendLayout();
             SuspendLayout();
             // 
             // tbpErfassen
@@ -160,7 +159,7 @@ namespace coIT.Clockodo.QuickActions
             tbcForms.Controls.Add(tbpClockodo);
             tbcForms.Controls.Add(tbpLexoffice);
             tbcForms.Controls.Add(tbpErfassen);
-            tbcForms.Controls.Add(tbpEinstellungen);
+            tbcForms.Controls.Add(tabEinstellungen);
             tbcForms.Font = new Font("Segoe UI", 13F);
             tbcForms.Location = new Point(2, 9);
             tbcForms.Name = "tbcForms";
@@ -325,15 +324,15 @@ namespace coIT.Clockodo.QuickActions
             tbpLexoffice.Text = "Lexoffice";
             tbpLexoffice.UseVisualStyleBackColor = true;
             // 
-            // tbpEinstellungen
+            // tabEinstellungen
             // 
-            tbpEinstellungen.Location = new Point(4, 32);
-            tbpEinstellungen.Name = "tbpEinstellungen";
-            tbpEinstellungen.Padding = new Padding(3);
-            tbpEinstellungen.Size = new Size(1279, 669);
-            tbpEinstellungen.TabIndex = 4;
-            tbpEinstellungen.Text = "Einstellungen";
-            tbpEinstellungen.UseVisualStyleBackColor = true;
+            tabEinstellungen.Location = new Point(4, 32);
+            tabEinstellungen.Name = "tabEinstellungen";
+            tabEinstellungen.Padding = new Padding(3);
+            tabEinstellungen.Size = new Size(1279, 669);
+            tabEinstellungen.TabIndex = 4;
+            tabEinstellungen.Text = "Einstellungen";
+            tabEinstellungen.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
@@ -360,7 +359,6 @@ namespace coIT.Clockodo.QuickActions
             gbxZeitraumSchnellauswahl.ResumeLayout(false);
             gbxZeitraum.ResumeLayout(false);
             gbxZeitraum.PerformLayout();
-            tbpLexoffice.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -389,6 +387,6 @@ namespace coIT.Clockodo.QuickActions
         private TabPage tbpLexoffice;
         private TabControl tbcClockodo;
         private TabPage tbpClockodoSelbstkontrolle;
-        private TabPage tbpEinstellungen;
+        private TabPage tabEinstellungen;
     }
 }

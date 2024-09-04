@@ -11,7 +11,8 @@ using coIT.Libraries.Toolkit.Datengrundlagen.KundenRelation;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
 using coIT.Libraries.Toolkit.Datengrundlagen.Umsatzkonten;
 using coIT.Toolkit.QuickActions;
-using coIT.Toolkit.QuickActions.Einstellungen;
+using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
+using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
 using CSharpFunctionalExtensions;
 using CSharpFunctionalExtensions.ValueTasks;
 
@@ -19,20 +20,23 @@ namespace coIT.Clockodo.QuickActions.Lexoffice
 {
     public partial class LexofficeRechnungskontrolle : UserControl
     {
-        private readonly EnvironmentManager _environmentManager;
+        private readonly LexofficeEinstellungen _lexofficeKonfiguration;
+        private readonly ClockodoEinstellungen _clockodoEinstellungen;
         private readonly IMitarbeiterRepository _mitarbeiterRepository;
         private readonly IKundeRepository _kundeRepository;
         private readonly IKontoRepository _kontoRepository;
 
         public LexofficeRechnungskontrolle(
-            EnvironmentManager environmentManager,
+            LexofficeEinstellungen lexofficeKonfiguration,
+            ClockodoEinstellungen clockodoEinstellungen,
             IMitarbeiterRepository mitarbeiterRepository,
             IKundeRepository kundeRepository,
             IKontoRepository kontoRepository
         )
         {
             InitializeComponent();
-            _environmentManager = environmentManager;
+            _lexofficeKonfiguration = lexofficeKonfiguration;
+            _clockodoEinstellungen = clockodoEinstellungen;
             _mitarbeiterRepository = mitarbeiterRepository;
             _kundeRepository = kundeRepository;
             _kontoRepository = kontoRepository;
@@ -82,9 +86,9 @@ namespace coIT.Clockodo.QuickActions.Lexoffice
 
         private async Task<Result<Invoice>> RechnungsdatenVonLexofficeAbfragen(string rechnungsId)
         {
-            return await _environmentManager
-                .Get<LexofficeKonfiguration>()
-                .Map((konfiguration) => new LexofficeService(konfiguration.LexofficeKey))
+            return await Result
+                .Success()
+                .Map(() => new LexofficeService(_lexofficeKonfiguration.LexofficeKey))
                 .MapTry(
                     (lexofficeService) => lexofficeService.GetInvoiceAsync(rechnungsId),
                     (_) =>
@@ -124,8 +128,8 @@ namespace coIT.Clockodo.QuickActions.Lexoffice
 
         private async Task<Result<List<UserWithTeam>>> MitarbeiterAusClockodoLaden()
         {
-            return await _environmentManager
-                .Get<ClockodoEinstellungen>()
+            return await Result
+                .Success(_clockodoEinstellungen)
                 .Map((konfiguration) => new TimeEntriesService(konfiguration.ClockodoCredentials))
                 .Map((clockodoService) => clockodoService.GetAllUsers())
                 .Map((mitarbeiter) => mitarbeiter.ToList());

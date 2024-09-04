@@ -28,13 +28,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EinstellungenControl));
-            groupBox6 = new GroupBox();
-            btnLexofficeEinstellungenSpeichern = new Button();
-            gbxDatengrundlagenKonfigurieren = new GroupBox();
-            gbxLexofficeKonfigurieren = new GroupBox();
-            lblLexofficeApiToken = new Label();
-            tbxLexofficeApiToken = new TextBox();
             groupBox3 = new GroupBox();
             groupBox1 = new GroupBox();
             tbxClockodoEmail = new TextBox();
@@ -48,88 +41,16 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             btnClockdoEinstellungenSpeichern = new Button();
             tbcEinstellungen = new TabControl();
             tbpClockodo = new TabPage();
-            tbpLexoffice = new TabPage();
-            groupBox5 = new GroupBox();
-            label2 = new Label();
             dlgKundenstamm = new OpenFileDialog();
             dlgUmsatzkonten = new OpenFileDialog();
             dlgMitarbeiter = new OpenFileDialog();
-            label6 = new Label();
-            tbxDatengrundlageConnectionString = new TextBox();
-            groupBox6.SuspendLayout();
-            gbxDatengrundlagenKonfigurieren.SuspendLayout();
-            gbxLexofficeKonfigurieren.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox4.SuspendLayout();
             tbcEinstellungen.SuspendLayout();
             tbpClockodo.SuspendLayout();
-            tbpLexoffice.SuspendLayout();
-            groupBox5.SuspendLayout();
             SuspendLayout();
-            // 
-            // groupBox6
-            // 
-            groupBox6.Controls.Add(btnLexofficeEinstellungenSpeichern);
-            groupBox6.Controls.Add(gbxDatengrundlagenKonfigurieren);
-            groupBox6.Controls.Add(gbxLexofficeKonfigurieren);
-            groupBox6.Location = new Point(6, 11);
-            groupBox6.Name = "groupBox6";
-            groupBox6.Size = new Size(1130, 337);
-            groupBox6.TabIndex = 10;
-            groupBox6.TabStop = false;
-            groupBox6.Text = "Zugänge konfigurieren";
-            // 
-            // btnLexofficeEinstellungenSpeichern
-            // 
-            btnLexofficeEinstellungenSpeichern.BackColor = Color.FromArgb(255, 192, 128);
-            btnLexofficeEinstellungenSpeichern.Location = new Point(863, 262);
-            btnLexofficeEinstellungenSpeichern.Name = "btnLexofficeEinstellungenSpeichern";
-            btnLexofficeEinstellungenSpeichern.Size = new Size(247, 57);
-            btnLexofficeEinstellungenSpeichern.TabIndex = 14;
-            btnLexofficeEinstellungenSpeichern.Text = "Einstellungen speichern";
-            btnLexofficeEinstellungenSpeichern.UseVisualStyleBackColor = false;
-            btnLexofficeEinstellungenSpeichern.Click += btnLexofficeEinstellungenSpeichern_Click;
-            // 
-            // gbxDatengrundlagenKonfigurieren
-            // 
-            gbxDatengrundlagenKonfigurieren.Controls.Add(tbxDatengrundlageConnectionString);
-            gbxDatengrundlagenKonfigurieren.Controls.Add(label6);
-            gbxDatengrundlagenKonfigurieren.Location = new Point(553, 29);
-            gbxDatengrundlagenKonfigurieren.Name = "gbxDatengrundlagenKonfigurieren";
-            gbxDatengrundlagenKonfigurieren.Size = new Size(557, 227);
-            gbxDatengrundlagenKonfigurieren.TabIndex = 12;
-            gbxDatengrundlagenKonfigurieren.TabStop = false;
-            gbxDatengrundlagenKonfigurieren.Text = "Datengrundlagen Konfigurieren";
-            // 
-            // gbxLexofficeKonfigurieren
-            // 
-            gbxLexofficeKonfigurieren.Controls.Add(lblLexofficeApiToken);
-            gbxLexofficeKonfigurieren.Controls.Add(tbxLexofficeApiToken);
-            gbxLexofficeKonfigurieren.Location = new Point(13, 29);
-            gbxLexofficeKonfigurieren.Name = "gbxLexofficeKonfigurieren";
-            gbxLexofficeKonfigurieren.Size = new Size(534, 227);
-            gbxLexofficeKonfigurieren.TabIndex = 7;
-            gbxLexofficeKonfigurieren.TabStop = false;
-            gbxLexofficeKonfigurieren.Text = "Lexoffice konfigurieren";
-            // 
-            // lblLexofficeApiToken
-            // 
-            lblLexofficeApiToken.AutoSize = true;
-            lblLexofficeApiToken.Location = new Point(28, 45);
-            lblLexofficeApiToken.Name = "lblLexofficeApiToken";
-            lblLexofficeApiToken.Size = new Size(361, 23);
-            lblLexofficeApiToken.TabIndex = 7;
-            lblLexofficeApiToken.Text = "Lexoffice Api Token (wird automatisch gesetzt)";
-            // 
-            // tbxLexofficeApiToken
-            // 
-            tbxLexofficeApiToken.Location = new Point(28, 71);
-            tbxLexofficeApiToken.Name = "tbxLexofficeApiToken";
-            tbxLexofficeApiToken.Size = new Size(378, 30);
-            tbxLexofficeApiToken.TabIndex = 6;
-            tbxLexofficeApiToken.UseSystemPasswordChar = true;
             // 
             // groupBox3
             // 
@@ -242,7 +163,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             // tbcEinstellungen
             // 
             tbcEinstellungen.Controls.Add(tbpClockodo);
-            tbcEinstellungen.Controls.Add(tbpLexoffice);
             tbcEinstellungen.Dock = DockStyle.Fill;
             tbcEinstellungen.Location = new Point(0, 0);
             tbcEinstellungen.Name = "tbcEinstellungen";
@@ -263,36 +183,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             tbpClockodo.Text = "Clockodo";
             tbpClockodo.UseVisualStyleBackColor = true;
             // 
-            // tbpLexoffice
-            // 
-            tbpLexoffice.Controls.Add(groupBox5);
-            tbpLexoffice.Controls.Add(groupBox6);
-            tbpLexoffice.Location = new Point(4, 32);
-            tbpLexoffice.Name = "tbpLexoffice";
-            tbpLexoffice.Padding = new Padding(3);
-            tbpLexoffice.Size = new Size(1155, 721);
-            tbpLexoffice.TabIndex = 1;
-            tbpLexoffice.Text = "Lexoffice";
-            tbpLexoffice.UseVisualStyleBackColor = true;
-            // 
-            // groupBox5
-            // 
-            groupBox5.Controls.Add(label2);
-            groupBox5.Location = new Point(6, 354);
-            groupBox5.Name = "groupBox5";
-            groupBox5.Size = new Size(1130, 113);
-            groupBox5.TabIndex = 11;
-            groupBox5.TabStop = false;
-            groupBox5.Text = "Anleitung";
-            // 
-            // label2
-            // 
-            label2.Location = new Point(13, 42);
-            label2.Name = "label2";
-            label2.Size = new Size(1042, 55);
-            label2.TabIndex = 5;
-            label2.Text = resources.GetString("label2.Text");
-            // 
             // dlgKundenstamm
             // 
             dlgKundenstamm.FileName = "Kundenstamm";
@@ -308,22 +198,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             dlgMitarbeiter.FileName = "openFileDialog3";
             dlgMitarbeiter.Filter = "json Files|*.json";
             // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new Point(20, 45);
-            label6.Name = "label6";
-            label6.Size = new Size(492, 23);
-            label6.TabIndex = 0;
-            label6.Text = "Datengrundlagen Connection String (wird automatisch gesetzt)";
-            // 
-            // tbxDatengrundlageConnectionString
-            // 
-            tbxDatengrundlageConnectionString.Location = new Point(20, 71);
-            tbxDatengrundlageConnectionString.Name = "tbxDatengrundlageConnectionString";
-            tbxDatengrundlageConnectionString.Size = new Size(492, 30);
-            tbxDatengrundlageConnectionString.TabIndex = 1;
-            // 
             // EinstellungenControl
             // 
             AutoScaleDimensions = new SizeF(9F, 23F);
@@ -333,11 +207,6 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             Margin = new Padding(4, 5, 4, 5);
             Name = "EinstellungenControl";
             Size = new Size(1163, 757);
-            groupBox6.ResumeLayout(false);
-            gbxDatengrundlagenKonfigurieren.ResumeLayout(false);
-            gbxDatengrundlagenKonfigurieren.PerformLayout();
-            gbxLexofficeKonfigurieren.ResumeLayout(false);
-            gbxLexofficeKonfigurieren.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
@@ -347,15 +216,10 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
             groupBox4.PerformLayout();
             tbcEinstellungen.ResumeLayout(false);
             tbpClockodo.ResumeLayout(false);
-            tbpLexoffice.ResumeLayout(false);
-            groupBox5.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
-        private GroupBox groupBox6;
-        private GroupBox gbxLexofficeKonfigurieren;
-        private TextBox tbxLexofficeApiToken;
         private GroupBox groupBox3;
         private GroupBox groupBox1;
         private TextBox tbxClockodoEmail;
@@ -369,16 +233,8 @@ namespace coIT.Clockodo.QuickActions.Einstellungen
         private Button btnClockdoEinstellungenSpeichern;
         private TabControl tbcEinstellungen;
         private TabPage tbpClockodo;
-        private TabPage tbpLexoffice;
-        private GroupBox groupBox5;
-        private Label label2;
-        private GroupBox gbxDatengrundlagenKonfigurieren;
-        private Label lblLexofficeApiToken;
         private OpenFileDialog dlgKundenstamm;
         private OpenFileDialog dlgUmsatzkonten;
         private OpenFileDialog dlgMitarbeiter;
-        private Button btnLexofficeEinstellungenSpeichern;
-        private TextBox tbxDatengrundlageConnectionString;
-        private Label label6;
     }
 }

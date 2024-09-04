@@ -17,7 +17,8 @@ using coIT.Libraries.WinForms;
 using coIT.Libraries.WinForms.DateTimeButtons;
 using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen;
-using CSharpFunctionalExtensions;
+using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
+using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
 
 namespace coIT.Clockodo.QuickActions;
 
@@ -25,8 +26,12 @@ public partial class FormMain : Form
 {
     private AccountInformation _accountInformation;
     private ClockodoEinstellungen _clockodoSettings;
+    private LexofficeEinstellungen _lexofficeEinstellungen;
+    private AesCryptographyService _cryptographer;
     private EnvironmentManager _environmentManager;
-    private FileSystemManager _fileSystemManager;
+    private IMitarbeiterRepository _mitarbeiterRepository;
+    private IKundeRepository _kundenRepository;
+    private IKontoRepository _umsatzkontoRepository;
 
     public FormMain()
     {
@@ -38,13 +43,31 @@ public partial class FormMain : Form
     private void EinstellungenEingebenErzwingen(object? sender, EventArgs e)
     {
         TabStatusSetzen(false);
-        tbcForms.SelectedTab = tbpEinstellungen;
+        tbcForms.SelectedTab = tabEinstellungen;
     }
 
-    private void EinstellungenSetzen(object sender, EinstellungenGeladenEventArgs einstellungen)
+    private async void EinstellungenSetzen(
+        object sender,
+        EinstellungenGeladenEventArgs einstellungen
+    )
     {
         _clockodoSettings = einstellungen.ClockodoEinstellungen;
+        _lexofficeEinstellungen = einstellungen.LexofficeEinstellungen;
+
+        _mitarbeiterRepository = new MitarbeiterDataTableRepository(
+            einstellungen.DatabaseEinstellungen.ConnectionString
+        );
+
+        _kundenRepository = new KundenRelationDataTableRepository(
+            einstellungen.DatabaseEinstellungen.ConnectionString
+        );
+
+        _umsatzkontoRepository = new UmsatzkontoDataTableRepository(
+            einstellungen.DatabaseEinstellungen.ConnectionString
+        );
+
         DatenNeuladen();
+        await LexofficeTabLaden();
         UhrAktualisierungsTimerStarten();
         TabStatusSetzen(true, true);
     }
@@ -53,8 +76,7 @@ public partial class FormMain : Form
     {
         this.Visible = false;
         KonfigurationManagerLaden();
-        EinstellungenLaden();
-        await LexofficeTabLaden();
+        await EinstellungenLaden();
 
         // Wird derzeit nicht benötigt und würde Anwender verwirren
         tbcForms.Controls.Remove(tbpErfassen);
@@ -67,53 +89,23 @@ public partial class FormMain : Form
 
     private async Task LexofficeTabLaden()
     {
-        var konfigurationLadenErgebnis = await _environmentManager.Get<AzureTableKonfiguration>(
-            "COIT_TOOLKIT_DATABASE_CONNECTIONSTRING"
+        var lexofficeTab = new LexofficeTabControl(
+            _lexofficeEinstellungen,
+            _clockodoSettings,
+            _mitarbeiterRepository,
+            _kundenRepository,
+            _umsatzkontoRepository
         );
 
-        if (konfigurationLadenErgebnis.IsFailure)
-        {
-            MessageBox.Show(
-                "Konfiguration für Azure Verbindung konnte nicht geladen werden",
-                "Fehler",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
-            return;
-        }
-
-        konfigurationLadenErgebnis
-            .Map(konfiguration =>
-            {
-                return (
-                    MitarbeiterRepository: new MitarbeiterDataTableRepository(
-                        konfiguration.ConnectionString
-                    ),
-                    KundenRelationRepository: new KundenRelationDataTableRepository(
-                        konfiguration.ConnectionString
-                    ),
-                    UmsatzkontoRepository: new UmsatzkontoDataTableRepository(
-                        konfiguration.ConnectionString
-                    )
-                );
-            })
-            .Map(repositories => new LexofficeTabControl(
-                _environmentManager,
-                repositories.MitarbeiterRepository,
-                repositories.KundenRelationRepository,
-                repositories.UmsatzkontoRepository
-            ))
-            .Tap(tbpLexoffice.Controls.Add)
-            .Tap(control => control.Dock = DockStyle.Fill);
+        tbpLexoffice.Controls.Add(lexofficeTab);
+        lexofficeTab.Dock = DockStyle.Fill;
     }
 
-    private void EinstellungenLaden()
+    private async Task EinstellungenLaden()
     {
-        var einstellungenControl = new EinstellungenControl(
-            _environmentManager
-        );
+        var einstellungenControl = new EinstellungenControl(_environmentManager, _cryptographer);
 
-        tbpEinstellungen.Controls.Add(einstellungenControl);
+        tabEinstellungen.Controls.Add(einstellungenControl);
         einstellungenControl.Dock = DockStyle.Fill;
         einstellungenControl.EinstellungenErfolreichGeladen += EinstellungenSetzen;
         einstellungenControl.EinstellungenKonntenNichtGeladenWerden +=
@@ -123,6 +115,17 @@ public partial class FormMain : Form
         einstellungenControl.EinstellungenAktualisierungEnde += (_, _) =>
             TabStatusSetzen(true, true);
         einstellungenControl.Laden();
+
+        UhrAktualisierungsTimerStarten();
+    }
+
+    private void TabStatusSetzen(bool status, bool settingsAuchBlockieren = false)
+    {
+        tbpErfassen.Enabled = status;
+        tbpClockodo.Enabled = status;
+
+        if (settingsAuchBlockieren)
+            tabEinstellungen.Enabled = status;
     }
 
     private void KonfigurationManagerLaden()
@@ -132,8 +135,8 @@ public partial class FormMain : Form
         var aesCryptography = AesCryptographyService.FromKey(key).Value;
         var jsonSerializer = new NewtonsoftJsonSerializer();
 
+        _cryptographer = aesCryptography;
         _environmentManager = new EnvironmentManager(aesCryptography, jsonSerializer);
-        _fileSystemManager = new FileSystemManager();
     }
 
     private void UhrAktualisierungsTimerStarten()
@@ -151,18 +154,6 @@ public partial class FormMain : Form
 
         dtpZeitraumStart.Value = vor14Tagen;
         dtpZeitraumEnde.Value = jetzt;
-    }
-
-    private void TabStatusSetzen(bool status, bool settingsAuchBlockieren = false)
-    {
-        tbpErfassen.Enabled = status;
-        tbpClockodo.Enabled = status;
-
-        if (settingsAuchBlockieren)
-        {
-            tbpEinstellungen.Enabled = status;
-            tbpEinstellungen.Enabled = status;
-        }
     }
 
     private async Task LoadUserAccountInformation()

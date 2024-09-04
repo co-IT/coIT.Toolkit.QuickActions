@@ -1,228 +1,221 @@
 using System.Diagnostics;
 using coIT.Libraries.Clockodo.Account;
 using coIT.Libraries.ConfigurationManager;
-using coIT.Toolkit.QuickActions;
+using coIT.Libraries.ConfigurationManager.Cryptography;
 using coIT.Toolkit.QuickActions.Einstellungen;
+using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
+using coIT.Toolkit.QuickActions.Einstellungen.DatabaseKonfiguration;
+using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
 using CSharpFunctionalExtensions;
 
-namespace coIT.Clockodo.QuickActions.Einstellungen
+namespace coIT.Clockodo.QuickActions.Einstellungen;
+
+public partial class EinstellungenControl : UserControl
 {
-    public partial class EinstellungenControl : UserControl
+    private static readonly string CoitToolkitQuickactionsClockodoEnvironmentKey =
+        "COIT_TOOLKIT_QUICKACTIONS_CLOCKODO";
+    private ClockodoEinstellungen _clockodoEinstellungen;
+    private DatabaseEinstellungen _databaseEinstellungen;
+    private LexofficeEinstellungen _lexofficeEinstellungen;
+
+    private readonly EnvironmentManager _environmentManager;
+    private readonly AesCryptographyService _cryptographer;
+
+    public EinstellungenControl(
+        EnvironmentManager environmentManager,
+        AesCryptographyService cryptographer
+    )
     {
-        private ClockodoEinstellungen _clockodoEinstellungen;
-        private LexofficeKonfiguration _lexofficeKonfiguration;
+        InitializeComponent();
 
-        private EnvironmentManager _environmentManager;
+        _environmentManager = environmentManager;
+        _cryptographer = cryptographer;
+    }
 
-        internal delegate void EinstellungenGeladenEventHandler(
-            object sender,
-            EinstellungenGeladenEventArgs e
+    internal event EinstellungenGeladenEventHandler EinstellungenErfolreichGeladen;
+    internal event EventHandler EinstellungenKonntenNichtGeladenWerden;
+
+    internal event EventHandler EinstellungenAktualisierungStart;
+    internal event EventHandler EinstellungenAktualisierungEnde;
+
+    public void Laden()
+    {
+        EinstellungenLaden();
+    }
+
+    private async void EinstellungenLaden()
+    {
+        var clockodoResult = await ClockodoEinstellungenLaden();
+        var databaseResult = await DatabaseEinstellungenLaden();
+        var lexOfficeResult = await LexofficeEinstellungenLaden();
+
+        var einstellungenLadenResult = Result.Combine(
+            clockodoResult,
+            databaseResult,
+            lexOfficeResult
         );
-        internal event EinstellungenGeladenEventHandler EinstellungenErfolreichGeladen;
-        internal event EventHandler EinstellungenKonntenNichtGeladenWerden;
 
-        internal event EventHandler EinstellungenAktualisierungStart;
-        internal event EventHandler EinstellungenAktualisierungEnde;
-
-        public EinstellungenControl(
-            EnvironmentManager environmentManager
-        )
+        if (einstellungenLadenResult.IsFailure)
         {
-            InitializeComponent();
-
-            _environmentManager = environmentManager;
-        }
-
-        public void Laden()
-        {
-            EinstellungenLaden();
-        }
-
-        private async void EinstellungenLaden()
-        {
-            var clockodoResult = await ClockodoEinstellungenLaden();
-            var lexofficeResult = await LexofficeEinstellungenLaden();
-
-            var einstellungenLadenResult = Result.Combine(clockodoResult, lexofficeResult);
-
-            if (einstellungenLadenResult.IsFailure)
-            {
-                EinstellungenKonntenNichtGeladenWerden?.Invoke(this, new());
-                MessageBox.Show(
-                    einstellungenLadenResult.Error,
-                    "Laden der Einstellungen fehlgeschlagen",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
-            else
-            {
-                EinstellungenErfolreichGeladen?.Invoke(
-                    this,
-                    new EinstellungenGeladenEventArgs
-                    {
-                        ClockodoEinstellungen = _clockodoEinstellungen,
-                        LexofficeEinstellungen = _lexofficeKonfiguration,
-                    }
-                );
-            }
-        }
-
-        private async Task<Result> ClockodoEinstellungenLaden()
-        {
-            var konfigurationLadenErgebnis = await _environmentManager.Get<ClockodoEinstellungen>();
-
-            if (konfigurationLadenErgebnis.IsFailure)
-            {
-                return Result.Failure(
-                    $"Es muss eine Konfiguration für Clockodo durchgeführt werden"
-                );
-            }
-
-            _clockodoEinstellungen = konfigurationLadenErgebnis.Value;
-            ClockodoEinstellungenAnzeigen();
-            return Result.Success();
-        }
-
-        private async void btnClockdoEinstellungenSpeichern_Click(object sender, EventArgs e)
-        {
-            EinstellungenAktualisierungStart?.Invoke(this, new());
-            await ClockodoEinstellungenPrüfenUndSpeichern();
-
-            EinstellungenAktualisierungEnde?.Invoke(this, new());
-            EinstellungenLaden();
-        }
-
-        private async Task ClockodoEinstellungenPrüfenUndSpeichern()
-        {
-            var neueEinstellungen = new ClockodoEinstellungen
-            {
-                ApiToken = tbxClockodoApiKey.Text,
-                EmailAddress = tbxClockodoEmail.Text,
-            };
-
-            var einstellungenSindValide = await ClockodoEinstellungenTesten(neueEinstellungen);
-
-            if (!einstellungenSindValide)
-            {
-                MessageBox.Show(
-                    $"Die eingegebene Clockodo Konfiguration ist unzulässig.{Environment.NewLine}"
-                        + "Bitte kopiere erneut E-Mail und Api-Key.",
-                    "Hinweis",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
-            var speicherErgebnis = await _environmentManager.Save(neueEinstellungen);
-
-            if (speicherErgebnis.IsFailure)
-            {
-                MessageBox.Show(
-                    speicherErgebnis.Error,
-                    "Hinweis",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
+            EinstellungenKonntenNichtGeladenWerden.Invoke(this, EventArgs.Empty);
             MessageBox.Show(
-                "Clockodo Konfiguration erfolgreich gespeichert",
-                "Hinweis",
+                einstellungenLadenResult.Error,
+                "Laden der Einstellungen fehlgeschlagen",
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Information
+                MessageBoxIcon.Warning
             );
         }
-
-        private async Task ClockodoEinstellungenAnzeigen()
+        else
         {
-            tbxClockodoApiKey.Text = _clockodoEinstellungen.ApiToken;
-            tbxClockodoEmail.Text = _clockodoEinstellungen.EmailAddress;
-        }
-
-        private async Task<bool> ClockodoEinstellungenTesten(ClockodoEinstellungen settings)
-        {
-            try
-            {
-                var testService = new AccountService(settings.CreateApiConnectionSettings);
-                var accountInformationen = await testService.GetMyAccount();
-                return accountInformationen is not null;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        private async Task<Result> LexofficeEinstellungenLaden()
-        {
-            var lexofficeKeyGesetzt = await _environmentManager.Get<LexofficeKonfiguration>();
-            var azureKeyGesetzt = await _environmentManager.Get<AzureTableKonfiguration>();
-
-            if (!lexofficeKeyGesetzt.IsSuccess)
-                return Result.Failure(
-                    $"Der Lexoffice Key konnte nicht in den Umgebungsvariablen gefunden werden. Bitte kontaktiere Jan"
-                );
-
-            _lexofficeKonfiguration = lexofficeKeyGesetzt.Value;
-            tbxLexofficeApiToken.Text = _lexofficeKonfiguration.LexofficeKey;
-
-            // TODO: Schauen ob wirklich gesetzt, nur noch azure Key nutzen
-            tbxDatengrundlageConnectionString.Text = azureKeyGesetzt.Value.ConnectionString;
-
-            return Result.Success();
-        }
-
-        private async Task<Result> LexofficeEinstellungenSpeichern()
-        {
-            var lexofficeToken = tbxLexofficeApiToken.Text;
-
-            var konfiguration = new LexofficeKonfiguration(lexofficeToken);
-
-            // Da der Lexoffice Key in Zukunft automatisch ausgerollt wird, muss ein normaler Anwender nie selber den Lexoffice key abspeichern
-#if DEBUG
-            var konfigurationSpeichernErgebnis = await _environmentManager.Save(konfiguration);
-#else
-            var konfigurationSpeichernErgebnis = Result.Success();
-#endif
-
-            if (konfigurationSpeichernErgebnis.IsFailure)
-            {
-                MessageBox.Show(
-                    "Fehler beim Speichern Lexoffice Konfiguration. Bitte erneut versuchen."
-                );
-                Application.Exit();
-            }
-
-            MessageBox.Show(
-                "Lexoffice Konfiguration erfolgreich gespeichert",
-                "Hinweis",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
+            EinstellungenErfolreichGeladen.Invoke(
+                this,
+                new EinstellungenGeladenEventArgs
+                {
+                    ClockodoEinstellungen = _clockodoEinstellungen,
+                    DatabaseEinstellungen = _databaseEinstellungen,
+                    LexofficeEinstellungen = _lexofficeEinstellungen,
+                }
             );
-
-            return Result.Success();
-        }
-
-        private void LinkInBrowserÖffnen(string link)
-        {
-            Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
-        }
-
-        private void lnkClockodo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            LinkInBrowserÖffnen(((Control)sender).Text);
-        }
-
-        private async void btnLexofficeEinstellungenSpeichern_Click(object sender, EventArgs e)
-        {
-            EinstellungenAktualisierungStart?.Invoke(this, new());
-            await LexofficeEinstellungenSpeichern();
-
-            EinstellungenAktualisierungEnde?.Invoke(this, new());
-            EinstellungenLaden();
         }
     }
+
+    private async Task<Result> DatabaseEinstellungenLaden()
+    {
+        return await _environmentManager
+            .Get<DatabaseEinstellungen>("COIT_TOOLKIT_DATABASE_CONNECTIONSTRING")
+            .Tap(einstellungen => _databaseEinstellungen = einstellungen)
+            .TapError(fehler =>
+                MessageBox.Show(
+                    $"Datenbankzugang konnte nicht geladen werden: {fehler}",
+                    "Fehler",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                )
+            );
+    }
+
+    private async Task<Result> LexofficeEinstellungenLaden()
+    {
+        return await Result
+            .Success(_databaseEinstellungen)
+            .Map(konfiguration => new LexofficeKonfigurationDataTableRepository(
+                konfiguration.ConnectionString,
+                _cryptographer
+            ))
+            .Bind(lexofficeRepository => lexofficeRepository.Get())
+            .Tap(settings => _lexofficeEinstellungen = settings)
+            .TapError(fehler =>
+                MessageBox.Show(
+                    $"Lexoffice Konfiguration konnte nicht geladen werden: {fehler}",
+                    "Fehler",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                )
+            );
+    }
+
+    private async Task<Result> ClockodoEinstellungenLaden()
+    {
+        var konfigurationLadenErgebnis = await _environmentManager.Get<ClockodoEinstellungen>(
+            CoitToolkitQuickactionsClockodoEnvironmentKey
+        );
+
+        if (konfigurationLadenErgebnis.IsFailure)
+            return Result.Failure("Es muss eine Konfiguration für Clockodo durchgeführt werden");
+
+        _clockodoEinstellungen = konfigurationLadenErgebnis.Value;
+        ClockodoEinstellungenAnzeigen();
+
+        return Result.Success();
+    }
+
+    private async void btnClockdoEinstellungenSpeichern_Click(object sender, EventArgs e)
+    {
+        EinstellungenAktualisierungStart?.Invoke(this, EventArgs.Empty);
+        await ClockodoEinstellungenPrüfenUndSpeichern();
+
+        EinstellungenAktualisierungEnde.Invoke(this, EventArgs.Empty);
+        EinstellungenLaden();
+    }
+
+    private async Task ClockodoEinstellungenPrüfenUndSpeichern()
+    {
+        var neueEinstellungen = new ClockodoEinstellungen
+        {
+            ApiToken = tbxClockodoApiKey.Text,
+            EmailAddress = tbxClockodoEmail.Text,
+        };
+
+        var einstellungenSindValide = await ClockodoEinstellungenTesten(neueEinstellungen);
+
+        if (!einstellungenSindValide)
+        {
+            MessageBox.Show(
+                $"Die eingegebene Clockodo Konfiguration ist unzulässig.{Environment.NewLine}"
+                    + "Bitte kopiere erneut E-Mail und Api-Key.",
+                "Hinweis",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+            return;
+        }
+
+        var speicherErgebnis = await _environmentManager.Save(
+            neueEinstellungen,
+            CoitToolkitQuickactionsClockodoEnvironmentKey
+        );
+
+        if (speicherErgebnis.IsFailure)
+        {
+            MessageBox.Show(
+                speicherErgebnis.Error,
+                "Hinweis",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+            return;
+        }
+
+        MessageBox.Show(
+            "Clockodo Konfiguration erfolgreich gespeichert",
+            "Hinweis",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information
+        );
+    }
+
+    private void ClockodoEinstellungenAnzeigen()
+    {
+        tbxClockodoApiKey.Text = _clockodoEinstellungen.ApiToken;
+        tbxClockodoEmail.Text = _clockodoEinstellungen.EmailAddress;
+    }
+
+    private async Task<bool> ClockodoEinstellungenTesten(ClockodoEinstellungen settings)
+    {
+        try
+        {
+            var testService = new AccountService(settings.CreateApiConnectionSettings);
+            var accountInformationen = await testService.GetMyAccount();
+            return accountInformationen is not null;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private static void LinkInBrowserÖffnen(string link)
+    {
+        Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
+    }
+
+    private void lnkClockodo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        LinkInBrowserÖffnen(((Control)sender).Text);
+    }
+
+    internal delegate void EinstellungenGeladenEventHandler(
+        object sender,
+        EinstellungenGeladenEventArgs e
+    );
 }

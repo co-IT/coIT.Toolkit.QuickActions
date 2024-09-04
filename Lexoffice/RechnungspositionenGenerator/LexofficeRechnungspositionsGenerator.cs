@@ -1,10 +1,7 @@
-using System;
 using coIT.Libraries.Clockodo.TimeEntries;
-using coIT.Libraries.Clockodo.TimeEntries.Contracts;
-using coIT.Libraries.ConfigurationManager;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
 using coIT.Toolkit.QuickActions;
-using coIT.Toolkit.QuickActions.Einstellungen;
+using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 using coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator;
 using CSharpFunctionalExtensions;
 
@@ -12,17 +9,17 @@ namespace coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator
 {
     public partial class LexofficeRechnungspositionsGenerator : UserControl
     {
-        private readonly EnvironmentManager _environmentManager;
+        private readonly ClockodoEinstellungen _clockodoEinstellungen;
         private readonly IMitarbeiterRepository _mitarbeiterRepository;
         private List<Mitarbeiter> _mitarbeiterListe = new();
 
         public LexofficeRechnungspositionsGenerator(
-            EnvironmentManager environmentManager,
+            ClockodoEinstellungen clockodoEinstellungen,
             IMitarbeiterRepository mitarbeiterRepository
         )
         {
             InitializeComponent();
-            _environmentManager = environmentManager;
+            _clockodoEinstellungen = clockodoEinstellungen;
             _mitarbeiterRepository = mitarbeiterRepository;
         }
 
@@ -43,9 +40,9 @@ namespace coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator
 
         private async Task MitarbeiterListeLaden()
         {
-            var mitarbeiterErgebnis = await _environmentManager
-                .Get<ClockodoEinstellungen>()
-                .Map((einstellungen) => new TimeEntriesService(einstellungen.ClockodoCredentials))
+            var mitarbeiterErgebnis = await Result
+                .Success()
+                .Map(() => new TimeEntriesService(_clockodoEinstellungen.ClockodoCredentials))
                 .Map((clockodoService) => clockodoService.GetAllUsers())
                 .Map((clockodoMitarbeiter) => clockodoMitarbeiter.ToList())
                 .BindZip((_) => _mitarbeiterRepository.GetAll())

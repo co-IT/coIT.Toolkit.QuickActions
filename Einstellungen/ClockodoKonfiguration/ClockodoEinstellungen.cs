@@ -1,12 +1,12 @@
 using coIT.Libraries.Clockodo;
 using coIT.Libraries.Clockodo.TimeEntries.Contracts;
 
-namespace coIT.Toolkit.QuickActions.Einstellungen;
+namespace coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 
-public class ClockodoEinstellungen
+public record ClockodoEinstellungen
 {
-    public string ApiToken { get; set; }
-    public string EmailAddress { get; set; }
+    public required string ApiToken { get; init; }
+    public required string EmailAddress { get; init; }
 
     public TimeEntriesServiceSettings ClockodoCredentials =>
         new(EmailAddress, ApiToken, "co-IT Clockodo Quick Actions", "info@co-it.eu");
