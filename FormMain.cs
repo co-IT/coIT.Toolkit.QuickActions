@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Diagnostics;
 using coIT.Libraries.Clockodo.Account;
 using coIT.Libraries.Clockodo.Account.Contracts;
@@ -17,548 +18,496 @@ using coIT.Toolkit.QuickActions.Einstellungen;
 using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
 using coIT.Toolkit.QuickActions.Lexoffice;
+using Timer = System.Windows.Forms.Timer;
 
 namespace coIT.Toolkit.QuickActions;
 
 public partial class FormMain : Form
 {
-    private AccountInformation _accountInformation;
-    private ClockodoEinstellungen _clockodoSettings;
-    private LexofficeEinstellungen _lexofficeEinstellungen;
-    private AesCryptographyService _cryptographer;
-    private EnvironmentManager _environmentManager;
-    private IMitarbeiterRepository _mitarbeiterRepository;
-    private IKundeRepository _kundenRepository;
-    private IKontoRepository _umsatzkontoRepository;
+  private AccountInformation _accountInformation;
+  private ClockodoEinstellungen _clockodoSettings;
+  private AesCryptographyService _cryptographer;
+  private EnvironmentManager _environmentManager;
+  private IKundeRepository _kundenRepository;
+  private LexofficeEinstellungen _lexofficeEinstellungen;
+  private IMitarbeiterRepository _mitarbeiterRepository;
+  private IKontoRepository _umsatzkontoRepository;
 
-    public FormMain()
+  public FormMain()
+  {
+    InitializeComponent();
+
+    dgvClockodoFehler.CellFormatting += dgvClockodoFehler_CellFormatting;
+  }
+
+  private void EinstellungenEingebenErzwingen(object? sender, EventArgs e)
+  {
+    TabStatusSetzen(false);
+    tbcForms.SelectedTab = tabEinstellungen;
+  }
+
+  private async void EinstellungenSetzen(object sender, EinstellungenGeladenEventArgs einstellungen)
+  {
+    _clockodoSettings = einstellungen.ClockodoEinstellungen;
+    _lexofficeEinstellungen = einstellungen.LexofficeEinstellungen;
+
+    _mitarbeiterRepository = new MitarbeiterDataTableRepository(einstellungen.DatabaseEinstellungen.ConnectionString);
+
+    _kundenRepository = new KundenRelationDataTableRepository(einstellungen.DatabaseEinstellungen.ConnectionString);
+
+    _umsatzkontoRepository = new UmsatzkontoDataTableRepository(einstellungen.DatabaseEinstellungen.ConnectionString);
+
+    DatenNeuladen();
+    await LexofficeTabLaden();
+    UhrAktualisierungsTimerStarten();
+    TabStatusSetzen(true, true);
+  }
+
+  private async void FormMain_Load(object sender, EventArgs e)
+  {
+    Visible = false;
+    KonfigurationManagerLaden();
+    await EinstellungenLaden();
+
+    // Wird derzeit nicht benötigt und würde Anwender verwirren
+    tbcForms.Controls.Remove(tbpErfassen);
+
+    Visible = true;
+
+    ZeitraumSchnellauswahlButtonTexteSetzen();
+    StandardZeitraumSetzen();
+  }
+
+  private async Task LexofficeTabLaden()
+  {
+    var lexofficeTab = new LexofficeTabControl(
+      _lexofficeEinstellungen,
+      _clockodoSettings,
+      _mitarbeiterRepository,
+      _kundenRepository,
+      _umsatzkontoRepository
+    );
+
+    tbpLexoffice.Controls.Add(lexofficeTab);
+    lexofficeTab.Dock = DockStyle.Fill;
+  }
+
+  private async Task EinstellungenLaden()
+  {
+    var einstellungenControl = new EinstellungenControl(_environmentManager, _cryptographer);
+
+    tabEinstellungen.Controls.Add(einstellungenControl);
+    einstellungenControl.Dock = DockStyle.Fill;
+    einstellungenControl.EinstellungenErfolreichGeladen += EinstellungenSetzen;
+    einstellungenControl.EinstellungenKonntenNichtGeladenWerden += EinstellungenEingebenErzwingen;
+    einstellungenControl.EinstellungenAktualisierungStart += (_, _) => TabStatusSetzen(false, true);
+    einstellungenControl.EinstellungenAktualisierungEnde += (_, _) => TabStatusSetzen(true, true);
+    einstellungenControl.Laden();
+
+    UhrAktualisierungsTimerStarten();
+  }
+
+  private void TabStatusSetzen(bool status, bool settingsAuchBlockieren = false)
+  {
+    tbpErfassen.Enabled = status;
+    tbpClockodo.Enabled = status;
+
+    if (settingsAuchBlockieren)
+      tabEinstellungen.Enabled = status;
+  }
+
+  private void KonfigurationManagerLaden()
+  {
+    var key =
+      "eyJJdGVtMSI6InlLdHdrUDJraEJRbTRTckpEaXFjQWpkM3pBc3NVdG8rSUNrTmFwYUgwbWs9IiwiSXRlbTIiOiJUblRxT1RUbXI3ajBCZlUwTEtnOS9BPT0ifQ==";
+    var aesCryptography = AesCryptographyService.FromKey(key).Value;
+    var jsonSerializer = new NewtonsoftJsonSerializer();
+
+    _cryptographer = aesCryptography;
+    _environmentManager = new EnvironmentManager(aesCryptography, jsonSerializer);
+  }
+
+  private void UhrAktualisierungsTimerStarten()
+  {
+    var timer = new Timer();
+    timer.Tick += async (_, _) => await LaufendeUhrAktualisieren();
+    timer.Interval = 60 * 1000;
+    timer.Start();
+  }
+
+  private void StandardZeitraumSetzen()
+  {
+    var jetzt = DateTime.Now.AddDays(-1);
+    var vor14Tagen = jetzt.AddDays(-15);
+
+    dtpZeitraumStart.Value = vor14Tagen;
+    dtpZeitraumEnde.Value = jetzt;
+  }
+
+  private async Task LoadUserAccountInformation()
+  {
+    try
     {
-        InitializeComponent();
+      var accountService = new AccountService(_clockodoSettings.CreateApiConnectionSettings);
+      _accountInformation = await accountService.GetMyAccount();
+      ctrl_ZeigeSelektiertenMitarbeiter.Text = $"Angemeldet als: {_accountInformation.Name}";
+    }
+    catch (Exception e)
+    {
+      Debug.WriteLine(e);
+    }
+  }
 
-        dgvClockodoFehler.CellFormatting += dgvClockodoFehler_CellFormatting;
+  private async void ctrl_LadeDaten_Click(object sender, EventArgs e)
+  {
+    await DatenNeuAbrufen();
+  }
+
+  private async Task DatenNeuAbrufen()
+  {
+    try
+    {
+      var jetzt = DateOnly.FromDateTime(DateTime.Now);
+      var vor14Tagen = jetzt.AddDays(-14);
+
+      var period = ClockodoPeriod.Create(vor14Tagen, jetzt);
+      var clockodoService = new TimeEntriesService(_clockodoSettings.ClockodoCredentials);
+
+      var alleEinträgeDerMitarbeiter = await clockodoService.GetTimeEntriesAsync(period.Value, _accountInformation.Id);
+
+      var historischeZeiteinträge = alleEinträgeDerMitarbeiter
+        .OrderByDescending(zeiteintrag => zeiteintrag.End)
+        .Select(HistorischerZeiteintrag.ErzeugeAus)
+        .Distinct()
+        .ToList()
+        .AsSortableBindingList();
+
+      ctrl_Zeiteintraege.ConfigureWithDefaultBehaviour();
+      ctrl_Zeiteintraege.DataSource = historischeZeiteinträge;
+      // ctrl_Zeiteintraege.Columns["serviceID"].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
+      // ctrl_Zeiteintraege.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+
+      if (ctrl_Zeiteintraege.Columns.Count > 0)
+      {
+        ctrl_Zeiteintraege.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+        ctrl_Zeiteintraege.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+        ctrl_Zeiteintraege.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+        ctrl_Zeiteintraege.Columns[Index.FromEnd(1)].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+      }
+
+      await LaufendeUhrAktualisieren();
+    }
+    catch (Exception e)
+    {
+      MessageBox.Show(e.Message, "Fehler beim Abrufen der Daten.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+  }
+
+  private async void DatenNeuladen()
+  {
+    await LoadUserAccountInformation();
+    await DatenNeuAbrufen();
+    ctrl_Zeiteintraege.Focus();
+    ctrl_Zeiteintraege.SelectAll();
+    ctrl_LadeDaten.Enabled = true;
+  }
+
+  private void OpenTimeEntry()
+  {
+    var zeiteintrag = ctrl_Zeiteintraege.BindSelected<HistorischerZeiteintrag>();
+
+    if (zeiteintrag == null)
+      return;
+
+    var clockService = new ClockService(_clockodoSettings.CreateApiConnectionSettings);
+    var form = new EditTimeEntry(clockService, zeiteintrag);
+
+    form.ShowDialog();
+  }
+
+  private async void ctrl_Zeiteintraege_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+  {
+    OpenTimeEntry();
+    await DatenNeuAbrufen();
+  }
+
+  private void ctrl_Zeiteintraege_KeyDown(object sender, KeyEventArgs e)
+  {
+    if (e.KeyCode == Keys.Enter)
+      OpenTimeEntry();
+  }
+
+  private async void ctrl_laufendeUhrAbfrage_Click(object sender, EventArgs e)
+  {
+    await LaufendeUhrAktualisieren();
+  }
+
+  private async Task LaufendeUhrAktualisieren()
+  {
+    var clockService = new ClockService(_clockodoSettings.CreateApiConnectionSettings);
+    var result = await clockService.GetRunningClockEntry();
+    if (result == null)
+      return;
+
+    //ctrl_textboxLaufenderEintrag.Text = $"{result.CustomerName}:{result.ProjectName}{Environment.NewLine}{result.Description}";
+    ctrl_textboxLaufenderEintrag.Text =
+      $"Eintrag läuft seit: {result?.TimeSince.LocalDateTime}{Environment.NewLine} Beschreibung: {result.Description}";
+  }
+
+  private async void btnFehlerAktualisiere_click(object sender, EventArgs e)
+  {
+    Aktualisieren();
+  }
+
+  private async Task Aktualisieren()
+  {
+    var zeitraumStart = dtpZeitraumStart.Value;
+
+    var zeitraumEnde = dtpZeitraumEnde.Value.GetEndOfDay();
+
+    if (zeitraumEnde.Date >= DateTime.Now.Date)
+    {
+      MessageBox.Show(
+        "Für den heutigen Tag oder die Zukunft, kann keine Selbstkontrolle durchgeführt werden",
+        "Fehler",
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Error
+      );
+      return;
     }
 
-    private void EinstellungenEingebenErzwingen(object? sender, EventArgs e)
+    var period = ClockodoPeriod.Create(zeitraumStart, zeitraumEnde);
+
+    if (period.IsFailure)
     {
-        TabStatusSetzen(false);
-        tbcForms.SelectedTab = tabEinstellungen;
+      MessageBox.Show(period.Error, "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
+      return;
     }
 
-    private async void EinstellungenSetzen(
-        object sender,
-        EinstellungenGeladenEventArgs einstellungen
+    var clockodoService = new TimeEntriesService(_clockodoSettings.ClockodoCredentials);
+
+    var abfragenUndAktualisierenFunc = async () =>
+      await ZeiteinträgeAbfragenUndEvaluieren(period.Value, clockodoService);
+
+    var standardTimeout = 30; //besprochen mit UAR am 02.08.24
+    using (
+      var warteDialog = new LadeForm(
+        "Zeiteinträge werden abgerufen und geprüft",
+        abfragenUndAktualisierenFunc,
+        TimeSpan.FromSeconds(standardTimeout)
+      )
     )
     {
-        _clockodoSettings = einstellungen.ClockodoEinstellungen;
-        _lexofficeEinstellungen = einstellungen.LexofficeEinstellungen;
+      var ergebnis = warteDialog.ShowDialog();
 
-        _mitarbeiterRepository = new MitarbeiterDataTableRepository(
-            einstellungen.DatabaseEinstellungen.ConnectionString
-        );
-
-        _kundenRepository = new KundenRelationDataTableRepository(
-            einstellungen.DatabaseEinstellungen.ConnectionString
-        );
-
-        _umsatzkontoRepository = new UmsatzkontoDataTableRepository(
-            einstellungen.DatabaseEinstellungen.ConnectionString
-        );
-
-        DatenNeuladen();
-        await LexofficeTabLaden();
-        UhrAktualisierungsTimerStarten();
-        TabStatusSetzen(true, true);
-    }
-
-    private async void FormMain_Load(object sender, EventArgs e)
-    {
-        this.Visible = false;
-        KonfigurationManagerLaden();
-        await EinstellungenLaden();
-
-        // Wird derzeit nicht benötigt und würde Anwender verwirren
-        tbcForms.Controls.Remove(tbpErfassen);
-
-        this.Visible = true;
-
-        ZeitraumSchnellauswahlButtonTexteSetzen();
-        StandardZeitraumSetzen();
-    }
-
-    private async Task LexofficeTabLaden()
-    {
-        var lexofficeTab = new LexofficeTabControl(
-            _lexofficeEinstellungen,
-            _clockodoSettings,
-            _mitarbeiterRepository,
-            _kundenRepository,
-            _umsatzkontoRepository
-        );
-
-        tbpLexoffice.Controls.Add(lexofficeTab);
-        lexofficeTab.Dock = DockStyle.Fill;
-    }
-
-    private async Task EinstellungenLaden()
-    {
-        var einstellungenControl = new EinstellungenControl(_environmentManager, _cryptographer);
-
-        tabEinstellungen.Controls.Add(einstellungenControl);
-        einstellungenControl.Dock = DockStyle.Fill;
-        einstellungenControl.EinstellungenErfolreichGeladen += EinstellungenSetzen;
-        einstellungenControl.EinstellungenKonntenNichtGeladenWerden +=
-            EinstellungenEingebenErzwingen;
-        einstellungenControl.EinstellungenAktualisierungStart += (_, _) =>
-            TabStatusSetzen(false, true);
-        einstellungenControl.EinstellungenAktualisierungEnde += (_, _) =>
-            TabStatusSetzen(true, true);
-        einstellungenControl.Laden();
-
-        UhrAktualisierungsTimerStarten();
-    }
-
-    private void TabStatusSetzen(bool status, bool settingsAuchBlockieren = false)
-    {
-        tbpErfassen.Enabled = status;
-        tbpClockodo.Enabled = status;
-
-        if (settingsAuchBlockieren)
-            tabEinstellungen.Enabled = status;
-    }
-
-    private void KonfigurationManagerLaden()
-    {
-        var key =
-            "eyJJdGVtMSI6InlLdHdrUDJraEJRbTRTckpEaXFjQWpkM3pBc3NVdG8rSUNrTmFwYUgwbWs9IiwiSXRlbTIiOiJUblRxT1RUbXI3ajBCZlUwTEtnOS9BPT0ifQ==";
-        var aesCryptography = AesCryptographyService.FromKey(key).Value;
-        var jsonSerializer = new NewtonsoftJsonSerializer();
-
-        _cryptographer = aesCryptography;
-        _environmentManager = new EnvironmentManager(aesCryptography, jsonSerializer);
-    }
-
-    private void UhrAktualisierungsTimerStarten()
-    {
-        var timer = new System.Windows.Forms.Timer();
-        timer.Tick += new EventHandler(async (_, _) => await LaufendeUhrAktualisieren());
-        timer.Interval = 60 * 1000;
-        timer.Start();
-    }
-
-    private void StandardZeitraumSetzen()
-    {
-        var jetzt = DateTime.Now.AddDays(-1);
-        var vor14Tagen = jetzt.AddDays(-15);
-
-        dtpZeitraumStart.Value = vor14Tagen;
-        dtpZeitraumEnde.Value = jetzt;
-    }
-
-    private async Task LoadUserAccountInformation()
-    {
-        try
-        {
-            var accountService = new AccountService(_clockodoSettings.CreateApiConnectionSettings);
-            _accountInformation = await accountService.GetMyAccount();
-            ctrl_ZeigeSelektiertenMitarbeiter.Text = $"Angemeldet als: {_accountInformation.Name}";
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e);
-        }
-    }
-
-    private async void ctrl_LadeDaten_Click(object sender, EventArgs e)
-    {
-        await DatenNeuAbrufen();
-    }
-
-    private async Task DatenNeuAbrufen()
-    {
-        try
-        {
-            var jetzt = DateOnly.FromDateTime(DateTime.Now);
-            var vor14Tagen = jetzt.AddDays(-14);
-
-            var period = ClockodoPeriod.Create(vor14Tagen, jetzt);
-            var clockodoService = new TimeEntriesService(_clockodoSettings.ClockodoCredentials);
-
-            var alleEinträgeDerMitarbeiter = (
-                await clockodoService.GetTimeEntriesAsync(period.Value, _accountInformation.Id)
-            );
-
-            var historischeZeiteinträge = alleEinträgeDerMitarbeiter
-                .OrderByDescending(zeiteintrag => zeiteintrag.End)
-                .Select(HistorischerZeiteintrag.ErzeugeAus)
-                .Distinct()
-                .ToList()
-                .AsSortableBindingList();
-
-            ctrl_Zeiteintraege.ConfigureWithDefaultBehaviour();
-            ctrl_Zeiteintraege.DataSource = historischeZeiteinträge;
-            // ctrl_Zeiteintraege.Columns["serviceID"].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
-            // ctrl_Zeiteintraege.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-
-            if (ctrl_Zeiteintraege.Columns.Count > 0)
-            {
-                ctrl_Zeiteintraege.Columns[0].AutoSizeMode =
-                    DataGridViewAutoSizeColumnMode.DisplayedCells;
-                ctrl_Zeiteintraege.Columns[1].AutoSizeMode =
-                    DataGridViewAutoSizeColumnMode.DisplayedCells;
-                ctrl_Zeiteintraege.Columns[2].AutoSizeMode =
-                    DataGridViewAutoSizeColumnMode.DisplayedCells;
-                ctrl_Zeiteintraege.Columns[Index.FromEnd(1)].AutoSizeMode =
-                    DataGridViewAutoSizeColumnMode.Fill;
-            }
-
-            await LaufendeUhrAktualisieren();
-        }
-        catch (Exception e)
-        {
+      switch (ergebnis)
+      {
+        case DialogResult.Abort:
+          MessageBox.Show(
+            "Die Aktion dauerte zu lange",
+            "Zeitüberschreitung",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Asterisk
+          );
+          break;
+        case DialogResult.OK:
+          if (dgvClockodoFehler.Rows.Count == 0)
             MessageBox.Show(
-                e.Message,
-                "Fehler beim Abrufen der Daten.",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
+              "Applaus, Applaus, es wurden keine Fehler gefunden.",
+              "Hinweis",
+              MessageBoxButtons.OK,
+              MessageBoxIcon.Information
             );
-        }
+          break;
+      }
     }
+  }
 
-    private async void DatenNeuladen()
-    {
-        await LoadUserAccountInformation();
-        await DatenNeuAbrufen();
-        ctrl_Zeiteintraege.Focus();
-        ctrl_Zeiteintraege.SelectAll();
-        ctrl_LadeDaten.Enabled = true;
-    }
+  private async Task ZeiteinträgeAbfragenUndEvaluieren(ClockodoPeriod period, TimeEntriesService clockodoService)
+  {
+    var alleEinträgeDesMitarbeiters = await clockodoService.GetTimeEntriesAsync(period, _accountInformation.Id);
 
-    private void OpenTimeEntry()
-    {
-        var zeiteintrag = ctrl_Zeiteintraege.BindSelected<HistorischerZeiteintrag>();
+    var evalator = ClockodoBusinessRulesEvaluator.CreateWithDefaultCustomerToBillingAccountsAsssociationes();
+    var ruleHelper = new ClockodoBusinessRulesHelper(evalator);
+    var employee = new List<string> { _accountInformation.Name };
 
-        if (zeiteintrag == null)
-            return;
+    var dailyUserReports = await clockodoService.GetDailyUserreports(period);
+    var änderungsAnträge = await clockodoService.GetAllChangeRequestsAsync(period, _accountInformation.Id);
 
-        var clockService = new ClockService(_clockodoSettings.CreateApiConnectionSettings);
-        var form = new EditTimeEntry(clockService, zeiteintrag);
+    var reportsFürDerzeitigenNutzer = dailyUserReports.Where(report => report.Id == _accountInformation.Id);
 
-        form.ShowDialog();
-    }
+    var failures = ruleHelper.ListAllFailuresAndViolations(
+      employee.ToImmutableHashSet(),
+      alleEinträgeDesMitarbeiters,
+      reportsFürDerzeitigenNutzer,
+      änderungsAnträge
+    );
 
-    private async void ctrl_Zeiteintraege_CellDoubleClick(
-        object sender,
-        DataGridViewCellEventArgs e
+    ShowErrorList(failures);
+  }
+
+  private void ShowErrorList(List<ClockodoFailure> listeGefundenerFehler)
+  {
+    var errorBinding = new SortableBindingList<ClockodoFailure>(listeGefundenerFehler.ToList());
+
+    dgvClockodoFehler.DataSource = errorBinding;
+
+    foreach (DataGridViewColumn column in dgvClockodoFehler.Columns)
+      column.SortMode = DataGridViewColumnSortMode.Automatic;
+
+    dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.FailureType));
+    dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.EmployeeName));
+    dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.Context));
+    dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.CanBeEdited));
+
+    dgvClockodoFehler.SpalteUmbenennen(nameof(ClockodoFailure.Message), "Bemerkungen");
+    dgvClockodoFehler.SpalteUmbenennen(nameof(ClockodoFailure.Date), "Datum");
+    dgvClockodoFehler.SpalteUmbenennen(nameof(ClockodoFailure.DirectLinkToTimeEntry), "Link");
+
+    dgvClockodoFehler.SpaltenGrößeFestlegen(nameof(ClockodoFailure.Message), 100, 150);
+    dgvClockodoFehler.SpaltenGrößeFestlegen(nameof(ClockodoFailure.Date), 150, 1);
+    dgvClockodoFehler.SpaltenGrößeFestlegen(nameof(ClockodoFailure.DirectLinkToTimeEntry), 100, 15);
+
+    dgvClockodoFehler.SpalteAlsHyperlink(nameof(ClockodoFailure.DirectLinkToTimeEntry));
+    dgvClockodoFehler.Sort(dgvClockodoFehler.Columns[nameof(ClockodoFailure.Message)], ListSortDirection.Ascending);
+  }
+
+  private void dgvClockodoFehler_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+  {
+    foreach (DataGridViewRow Myrow in dgvClockodoFehler.Rows)
+      if (!(bool)Myrow.Cells[nameof(ClockodoFailure.CanBeEdited)].Value)
+        Myrow.DefaultCellStyle.BackColor = Color.DarkGray;
+  }
+
+  private void dgvClockodoFehler_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+  {
+    if (
+      e.RowIndex < 0
+      || e.RowIndex > dgvClockodoFehler.Rows.Count
+      || e.ColumnIndex < 0
+      || e.ColumnIndex > dgvClockodoFehler.Columns.Count
     )
-    {
-        OpenTimeEntry();
-        await DatenNeuAbrufen();
-    }
+      return;
 
-    private void ctrl_Zeiteintraege_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Enter)
-            OpenTimeEntry();
-    }
+    var clickedCell = dgvClockodoFehler.Rows[e.RowIndex].Cells[e.ColumnIndex];
+    if (clickedCell is not DataGridViewLinkCell || clickedCell.Value is null)
+      return;
 
-    private async void ctrl_laufendeUhrAbfrage_Click(object sender, EventArgs e)
-    {
-        await LaufendeUhrAktualisieren();
-    }
+    LinkInBrowserÖffnen(clickedCell.Value.ToString());
+  }
 
-    private async Task LaufendeUhrAktualisieren()
-    {
-        var clockService = new ClockService(_clockodoSettings.CreateApiConnectionSettings);
-        var result = await clockService.GetRunningClockEntry();
-        if (result == null)
-            return;
+  private void LinkInBrowserÖffnen(string link)
+  {
+    Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
+  }
 
-        //ctrl_textboxLaufenderEintrag.Text = $"{result.CustomerName}:{result.ProjectName}{Environment.NewLine}{result.Description}";
-        ctrl_textboxLaufenderEintrag.Text =
-            $"Eintrag läuft seit: {result?.TimeSince.LocalDateTime}{Environment.NewLine} Beschreibung: {result.Description}";
-    }
+  private void ZeitraumSetzen(DateTime start, DateTime ende)
+  {
+    dtpZeitraumStart.Value = start;
+    dtpZeitraumEnde.Value = ende;
+  }
 
-    private async void btnFehlerAktualisiere_click(object sender, EventArgs e)
-    {
-        Aktualisieren();
-    }
+  private void ZeitraumSchnellauswahlButtonTexteSetzen()
+  {
+    BtnTextErsteZweiWochenAktuellerMonatSetzen();
+    BtnTextLetzteZweiWochenVorherigerMonatSetzen();
+    BtnTextLetzterMonatSetzen();
+  }
 
-    private async Task Aktualisieren()
-    {
-        var zeitraumStart = dtpZeitraumStart.Value;
+  private (DateTime Start, DateTime Ende) ZeitraumErsteZweiWochenAktuellerMonat()
+  {
+    var monatsAnfang = DateTime.Now.GetFirstDayInMonth();
+    var zweiWochenNachMonatsAnfang = monatsAnfang.AddDays(7 * 2);
+    var gestern = DateTime.Now.AddDays(-1);
 
-        var zeitraumEnde = dtpZeitraumEnde.Value.GetEndOfDay();
+    if (gestern < zweiWochenNachMonatsAnfang)
+      return (monatsAnfang, gestern);
 
-        if (zeitraumEnde.Date >= DateTime.Now.Date)
-        {
-            MessageBox.Show(
-                "Für den heutigen Tag oder die Zukunft, kann keine Selbstkontrolle durchgeführt werden",
-                "Fehler",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
-            return;
-        }
+    return (monatsAnfang, zweiWochenNachMonatsAnfang);
+  }
 
-        var period = ClockodoPeriod.Create(zeitraumStart, zeitraumEnde);
+  private void BtnTextErsteZweiWochenAktuellerMonatSetzen()
+  {
+    var (monatsAnfang, zweiWochenNachMonatsAnfang) = ZeitraumErsteZweiWochenAktuellerMonat();
+    var buttonText = $"{monatsAnfang:dd.}-{zweiWochenNachMonatsAnfang:dd. MMM}";
+    btnErsteZweiWochenAktuellerMonat.Text = buttonText;
+  }
 
-        if (period.IsFailure)
-        {
-            MessageBox.Show(period.Error, "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
-        }
+  private void btnErsteZweiWochenAktuellerMonat_Click(object sender, EventArgs e)
+  {
+    var (monatsAnfang, zweiWochenNachMonatsAnfang) = ZeitraumErsteZweiWochenAktuellerMonat();
 
-        var clockodoService = new TimeEntriesService(_clockodoSettings.ClockodoCredentials);
+    ZeitraumSetzen(monatsAnfang, zweiWochenNachMonatsAnfang);
+  }
 
-        var abfragenUndAktualisierenFunc = async () =>
-            await ZeiteinträgeAbfragenUndEvaluieren(period.Value, clockodoService);
+  private (DateTime Start, DateTime Ende) ZeitraumLetzteZweiWochenVorherigerMonat()
+  {
+    var letzterMonatEnde = DateTime.Now.AddMonths(-1).GetLastDayInMonth();
+    var zweiWochenVorLetzterMonatEnde = letzterMonatEnde.AddDays(-7 * 2);
 
-        var standardTimeout = 30; //besprochen mit UAR am 02.08.24
-        using (
-            var warteDialog = new LadeForm(
-                "Zeiteinträge werden abgerufen und geprüft",
-                abfragenUndAktualisierenFunc,
-                TimeSpan.FromSeconds(standardTimeout)
-            )
-        )
-        {
-            var ergebnis = warteDialog.ShowDialog();
+    return (zweiWochenVorLetzterMonatEnde, letzterMonatEnde);
+  }
 
-            switch (ergebnis)
-            {
-                case DialogResult.Abort:
-                    MessageBox.Show(
-                        "Die Aktion dauerte zu lange",
-                        "Zeitüberschreitung",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk
-                    );
-                    break;
-                case DialogResult.OK:
-                    if (dgvClockodoFehler.Rows.Count == 0)
-                    {
-                        MessageBox.Show(
-                            "Applaus, Applaus, es wurden keine Fehler gefunden.",
-                            "Hinweis",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information
-                        );
-                    }
-                    break;
-            }
-        }
-    }
+  private void BtnTextLetzteZweiWochenVorherigerMonatSetzen()
+  {
+    var (monatsAnfang, zweiWochenNachMonatsAnfang) = ZeitraumLetzteZweiWochenVorherigerMonat();
+    var buttonText = $"{monatsAnfang:dd.}-{zweiWochenNachMonatsAnfang:dd. MMM}";
+    btnLetzteZweiWochenVormonat.Text = buttonText;
+  }
 
-    private async Task ZeiteinträgeAbfragenUndEvaluieren(
-        ClockodoPeriod period,
-        TimeEntriesService clockodoService
-    )
-    {
-        var alleEinträgeDesMitarbeiters = await clockodoService.GetTimeEntriesAsync(
-            period,
-            _accountInformation.Id
-        );
+  private void btnLetzteZweiWochenVormonat_Click(object sender, EventArgs e)
+  {
+    var (zweiWochenVorLetzterMonatEnde, letzterMonatEnde) = ZeitraumLetzteZweiWochenVorherigerMonat();
 
-        var evalator =
-            ClockodoBusinessRulesEvaluator.CreateWithDefaultCustomerToBillingAccountsAsssociationes();
-        var ruleHelper = new ClockodoBusinessRulesHelper(evalator);
-        var employee = new List<string> { _accountInformation.Name };
+    ZeitraumSetzen(zweiWochenVorLetzterMonatEnde, letzterMonatEnde);
+  }
 
-        var dailyUserReports = await clockodoService.GetDailyUserreports(period);
-        var änderungsAnträge = await clockodoService.GetAllChangeRequestsAsync(
-            period,
-            _accountInformation.Id
-        );
+  private void BtnTextLetzterMonatSetzen()
+  {
+    var (startLetzterMonat, endeLetzterMonat) = ZeitraumLetzterMonat();
+    var buttonText = $"{startLetzterMonat:dd.}-{endeLetzterMonat:dd. MMM}";
 
-        var reportsFürDerzeitigenNutzer = dailyUserReports.Where(report =>
-            report.Id == _accountInformation.Id
-        );
+    btnLetzterMonat.Text = buttonText;
+  }
 
-        var failures = ruleHelper.ListAllFailuresAndViolations(
-            employee.ToImmutableHashSet(),
-            alleEinträgeDesMitarbeiters,
-            reportsFürDerzeitigenNutzer,
-            änderungsAnträge
-        );
+  private (DateTime Start, DateTime Ende) ZeitraumLetzterMonat()
+  {
+    var heute = DateTime.Now;
+    var irgendwannLetzterMonat = heute.AddMonths(-1);
 
-        ShowErrorList(failures);
-    }
+    var startLetzterMonat = irgendwannLetzterMonat.GetFirstDayInMonth();
+    var letzerTagImMonat = irgendwannLetzterMonat.GetLastDayInMonth();
 
-    private void ShowErrorList(List<ClockodoFailure> listeGefundenerFehler)
-    {
-        var errorBinding = new SortableBindingList<ClockodoFailure>(listeGefundenerFehler.ToList());
+    var endeLetzterTagImMonat = letzerTagImMonat.GetEndOfDay();
 
-        dgvClockodoFehler.DataSource = errorBinding;
+    return (startLetzterMonat, endeLetzterTagImMonat);
+  }
 
-        foreach (DataGridViewColumn column in dgvClockodoFehler.Columns)
-            column.SortMode = DataGridViewColumnSortMode.Automatic;
+  private void btnLetzterMonat_Click(object sender, EventArgs e)
+  {
+    var (startLetzterMonat, endeLetzterMonat) = ZeitraumLetzterMonat();
 
-        dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.FailureType));
-        dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.EmployeeName));
-        dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.Context));
-        dgvClockodoFehler.SpalteVerstecken(nameof(ClockodoFailure.CanBeEdited));
+    ZeitraumSetzen(startLetzterMonat, endeLetzterMonat);
+  }
 
-        dgvClockodoFehler.SpalteUmbenennen(nameof(ClockodoFailure.Message), "Bemerkungen");
-        dgvClockodoFehler.SpalteUmbenennen(nameof(ClockodoFailure.Date), "Datum");
-        dgvClockodoFehler.SpalteUmbenennen(nameof(ClockodoFailure.DirectLinkToTimeEntry), "Link");
+  private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+  {
+    LinkInBrowserÖffnen(((Control)sender).Text);
+  }
 
-        dgvClockodoFehler.SpaltenGrößeFestlegen(nameof(ClockodoFailure.Message), 100, 150);
-        dgvClockodoFehler.SpaltenGrößeFestlegen(nameof(ClockodoFailure.Date), 150, 1);
-        dgvClockodoFehler.SpaltenGrößeFestlegen(
-            nameof(ClockodoFailure.DirectLinkToTimeEntry),
-            100,
-            15
-        );
+  private void dtpZeitraumEnde_ValueChanged(object sender, EventArgs e)
+  {
+    DateTimePickerDarfNichtHeuteOderSpäterSein((DateTimePicker)sender);
+  }
 
-        dgvClockodoFehler.SpalteAlsHyperlink(nameof(ClockodoFailure.DirectLinkToTimeEntry));
-        dgvClockodoFehler.Sort(
-            dgvClockodoFehler.Columns[nameof(ClockodoFailure.Message)],
-            System.ComponentModel.ListSortDirection.Ascending
-        );
-    }
+  private void dtpZeitraumStart_ValueChanged(object sender, EventArgs e)
+  {
+    DateTimePickerDarfNichtHeuteOderSpäterSein((DateTimePicker)sender);
+  }
 
-    private void dgvClockodoFehler_CellFormatting(
-        object sender,
-        DataGridViewCellFormattingEventArgs e
-    )
-    {
-        foreach (DataGridViewRow Myrow in dgvClockodoFehler.Rows)
-        {
-            if (!(bool)Myrow.Cells[nameof(ClockodoFailure.CanBeEdited)].Value)
-                Myrow.DefaultCellStyle.BackColor = Color.DarkGray;
-        }
-    }
-
-    private void dgvClockodoFehler_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-    {
-        if (
-            e.RowIndex < 0
-            || e.RowIndex > dgvClockodoFehler.Rows.Count
-            || e.ColumnIndex < 0
-            || e.ColumnIndex > dgvClockodoFehler.Columns.Count
-        )
-            return;
-
-        var clickedCell = dgvClockodoFehler.Rows[e.RowIndex].Cells[e.ColumnIndex];
-        if (clickedCell is not DataGridViewLinkCell || clickedCell.Value is null)
-            return;
-
-        LinkInBrowserÖffnen(clickedCell.Value.ToString());
-    }
-
-    private void LinkInBrowserÖffnen(string link)
-    {
-        Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
-    }
-
-    private void ZeitraumSetzen(DateTime start, DateTime ende)
-    {
-        dtpZeitraumStart.Value = start;
-        dtpZeitraumEnde.Value = ende;
-    }
-
-    private void ZeitraumSchnellauswahlButtonTexteSetzen()
-    {
-        BtnTextErsteZweiWochenAktuellerMonatSetzen();
-        BtnTextLetzteZweiWochenVorherigerMonatSetzen();
-        BtnTextLetzterMonatSetzen();
-    }
-
-    private (DateTime Start, DateTime Ende) ZeitraumErsteZweiWochenAktuellerMonat()
-    {
-        var monatsAnfang = DateTime.Now.GetFirstDayInMonth();
-        var zweiWochenNachMonatsAnfang = monatsAnfang.AddDays(7 * 2);
-        var gestern = DateTime.Now.AddDays(-1);
-
-        if (gestern < zweiWochenNachMonatsAnfang)
-            return (monatsAnfang, gestern);
-
-        return (monatsAnfang, zweiWochenNachMonatsAnfang);
-    }
-
-    private void BtnTextErsteZweiWochenAktuellerMonatSetzen()
-    {
-        var (monatsAnfang, zweiWochenNachMonatsAnfang) = ZeitraumErsteZweiWochenAktuellerMonat();
-        var buttonText = $"{monatsAnfang:dd.}-{zweiWochenNachMonatsAnfang:dd. MMM}";
-        btnErsteZweiWochenAktuellerMonat.Text = buttonText;
-    }
-
-    private void btnErsteZweiWochenAktuellerMonat_Click(object sender, EventArgs e)
-    {
-        var (monatsAnfang, zweiWochenNachMonatsAnfang) = ZeitraumErsteZweiWochenAktuellerMonat();
-
-        ZeitraumSetzen(monatsAnfang, zweiWochenNachMonatsAnfang);
-    }
-
-    private (DateTime Start, DateTime Ende) ZeitraumLetzteZweiWochenVorherigerMonat()
-    {
-        var letzterMonatEnde = DateTime.Now.AddMonths(-1).GetLastDayInMonth();
-        var zweiWochenVorLetzterMonatEnde = letzterMonatEnde.AddDays(-7 * 2);
-
-        return (zweiWochenVorLetzterMonatEnde, letzterMonatEnde);
-    }
-
-    private void BtnTextLetzteZweiWochenVorherigerMonatSetzen()
-    {
-        var (monatsAnfang, zweiWochenNachMonatsAnfang) = ZeitraumLetzteZweiWochenVorherigerMonat();
-        var buttonText = $"{monatsAnfang:dd.}-{zweiWochenNachMonatsAnfang:dd. MMM}";
-        btnLetzteZweiWochenVormonat.Text = buttonText;
-    }
-
-    private void btnLetzteZweiWochenVormonat_Click(object sender, EventArgs e)
-    {
-        var (zweiWochenVorLetzterMonatEnde, letzterMonatEnde) =
-            ZeitraumLetzteZweiWochenVorherigerMonat();
-
-        ZeitraumSetzen(zweiWochenVorLetzterMonatEnde, letzterMonatEnde);
-    }
-
-    private void BtnTextLetzterMonatSetzen()
-    {
-        var (startLetzterMonat, endeLetzterMonat) = ZeitraumLetzterMonat();
-        var buttonText = $"{startLetzterMonat:dd.}-{endeLetzterMonat:dd. MMM}";
-
-        btnLetzterMonat.Text = buttonText;
-    }
-
-    private (DateTime Start, DateTime Ende) ZeitraumLetzterMonat()
-    {
-        var heute = DateTime.Now;
-        var irgendwannLetzterMonat = heute.AddMonths(-1);
-
-        var startLetzterMonat = irgendwannLetzterMonat.GetFirstDayInMonth();
-        var letzerTagImMonat = irgendwannLetzterMonat.GetLastDayInMonth();
-
-        var endeLetzterTagImMonat = letzerTagImMonat.GetEndOfDay();
-
-        return (startLetzterMonat, endeLetzterTagImMonat);
-    }
-
-    private void btnLetzterMonat_Click(object sender, EventArgs e)
-    {
-        var (startLetzterMonat, endeLetzterMonat) = ZeitraumLetzterMonat();
-
-        ZeitraumSetzen(startLetzterMonat, endeLetzterMonat);
-    }
-
-    private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-        LinkInBrowserÖffnen(((Control)sender).Text);
-    }
-
-    private void dtpZeitraumEnde_ValueChanged(object sender, EventArgs e)
-    {
-        DateTimePickerDarfNichtHeuteOderSpäterSein((DateTimePicker)sender);
-    }
-
-    private void dtpZeitraumStart_ValueChanged(object sender, EventArgs e)
-    {
-        DateTimePickerDarfNichtHeuteOderSpäterSein((DateTimePicker)sender);
-    }
-
-    private void DateTimePickerDarfNichtHeuteOderSpäterSein(DateTimePicker picker)
-    {
-        if (picker.Value >= DateTime.Now.Date)
-            picker.Value = DateTime.Now.AddDays(-1).GetEndOfDay();
-    }
+  private void DateTimePickerDarfNichtHeuteOderSpäterSein(DateTimePicker picker)
+  {
+    if (picker.Value >= DateTime.Now.Date)
+      picker.Value = DateTime.Now.AddDays(-1).GetEndOfDay();
+  }
 }

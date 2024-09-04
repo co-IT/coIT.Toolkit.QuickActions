@@ -1,4 +1,3 @@
-﻿namespace coIT.Toolkit.QuickActions
-{
-    internal interface Info { }
-}
+﻿namespace coIT.Toolkit.QuickActions;
+
+internal interface Info { }

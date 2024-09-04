@@ -1,10 +1,9 @@
-namespace coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator
-{
-    public static class ServiceTypePositions
-    {
-        public const string Service = "Dienstleistungen";
-        public const string GoodsSale = "Warenverkauf";
+namespace coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator;
 
-        public static string[] All = { Service, GoodsSale };
-    }
+public static class ServiceTypePositions
+{
+  public const string Service = "Dienstleistungen";
+  public const string GoodsSale = "Warenverkauf";
+
+  public static string[] All = { Service, GoodsSale };
 }

@@ -1,27 +1,21 @@
-using coIT.Libraries.Clockodo.Absences.Contracts;
 using coIT.Libraries.ConfigurationManager.Cryptography;
 using CSharpFunctionalExtensions;
 
-namespace coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration
+namespace coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
+
+internal class LexofficeKonfigurationMapper
 {
-    internal class LexofficeKonfigurationMapper
-    {
-        private readonly IDoCryptography _cryptographyService;
+  private readonly IDoCryptography _cryptographyService;
 
-        public LexofficeKonfigurationMapper(IDoCryptography cryptographyService)
-        {
-            _cryptographyService = cryptographyService;
-        }
+  public LexofficeKonfigurationMapper(IDoCryptography cryptographyService)
+  {
+    _cryptographyService = cryptographyService;
+  }
 
-        public Result<LexofficeEinstellungen> VonEntity(LexofficeKonfigurationEntity entity)
-        {
-            return _cryptographyService
-                .Decrypt(entity.LexofficeKey)
-                .Map(
-                    (Func<string, LexofficeEinstellungen>)(
-                        key => new LexofficeEinstellungen { LexofficeKey = key }
-                    )
-                );
-        }
-    }
+  public Result<LexofficeEinstellungen> VonEntity(LexofficeKonfigurationEntity entity)
+  {
+    return _cryptographyService
+      .Decrypt(entity.LexofficeKey)
+      .Map((Func<string, LexofficeEinstellungen>)(key => new LexofficeEinstellungen { LexofficeKey = key }));
+  }
 }

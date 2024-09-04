@@ -1,7 +1,6 @@
-namespace coIT.Toolkit.QuickActions.Einstellungen.DatabaseKonfiguration
+namespace coIT.Toolkit.QuickActions.Einstellungen.DatabaseKonfiguration;
+
+internal record DatabaseEinstellungen
 {
-    internal record DatabaseEinstellungen
-    {
-        public required string ConnectionString { get; init; }
-    }
+  public required string ConnectionString { get; init; }
 }

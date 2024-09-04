@@ -8,15 +8,15 @@
     <BaseOutputPath>..\..\build\coIT.Clockodo.QuickActions</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="coIT.Libraries.Clockodo" Version="1.0.0" />
-    <PackageReference Include="coIT.Libraries.ClockodoBusinessRules" Version="1.0.0" />
-    <PackageReference Include="coIT.Libraries.ConfigurationManager" Version="1.1.0" />
-    <PackageReference Include="coIT.Libraries.LexOffice" Version="1.0.0" />
-    <PackageReference Include="coIT.Libraries.Lexoffice.BusinessRules" Version="2.0.0" />
-    <PackageReference Include="coIT.Libraries.Toolkit.Datengrundlagen" Version="2.0.1" />
-    <PackageReference Include="coIT.Libraries.WinForms" Version="1.0.0" />
-    <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="coIT.Libraries.Clockodo" Version="1.0.0"/>
+    <PackageReference Include="coIT.Libraries.ClockodoBusinessRules" Version="1.0.0"/>
+    <PackageReference Include="coIT.Libraries.ConfigurationManager" Version="1.1.0"/>
+    <PackageReference Include="coIT.Libraries.LexOffice" Version="1.0.0"/>
+    <PackageReference Include="coIT.Libraries.Lexoffice.BusinessRules" Version="2.0.0"/>
+    <PackageReference Include="coIT.Libraries.Toolkit.Datengrundlagen" Version="2.0.1"/>
+    <PackageReference Include="coIT.Libraries.WinForms" Version="1.0.0"/>
+    <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
   </ItemGroup>
   <ItemGroup>
     <None Update="img\installer_banner.jpg">
