@@ -1,4 +1,4 @@
-namespace coIT.Clockodo.QuickActions
+namespace coIT.Toolkit.QuickActions
 {
     partial class FormMain
     {

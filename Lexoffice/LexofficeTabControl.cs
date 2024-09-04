@@ -1,11 +1,11 @@
-using coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator;
 using coIT.Libraries.Toolkit.Datengrundlagen.KundenRelation;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
 using coIT.Libraries.Toolkit.Datengrundlagen.Umsatzkonten;
 using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
+using coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator;
 
-namespace coIT.Clockodo.QuickActions.Lexoffice
+namespace coIT.Toolkit.QuickActions.Lexoffice
 {
     public partial class LexofficeTabControl : UserControl
     {

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using coIT.Clockodo.QuickActions;
 
 namespace coIT.Toolkit.QuickActions
 {

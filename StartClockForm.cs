@@ -1,8 +1,7 @@
 ﻿using coIT.Libraries.Clockodo.Clock;
 using coIT.Libraries.Clockodo.Clock.Contracts;
-using coIT.Toolkit.QuickActions;
 
-namespace coIT.Clockodo.QuickActions;
+namespace coIT.Toolkit.QuickActions;
 
 internal partial class EditTimeEntry : Form
 {

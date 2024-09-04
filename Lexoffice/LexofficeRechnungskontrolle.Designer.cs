@@ -1,4 +1,4 @@
-namespace coIT.Clockodo.QuickActions.Lexoffice
+namespace coIT.Toolkit.QuickActions.Lexoffice
 {
     partial class LexofficeRechnungskontrolle
     {

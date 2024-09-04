@@ -1,5 +1,5 @@
 
-namespace coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator
+namespace coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator
 {
     partial class LexofficeRechnungspositionsGenerator
     {

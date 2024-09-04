@@ -1,4 +1,4 @@
-namespace coIT.Clockodo.QuickActions.Einstellungen
+namespace coIT.Toolkit.QuickActions.Einstellungen
 {
     partial class EinstellungenControl
     {

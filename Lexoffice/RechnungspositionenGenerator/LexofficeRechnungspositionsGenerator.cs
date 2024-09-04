@@ -1,11 +1,9 @@
 using coIT.Libraries.Clockodo.TimeEntries;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
-using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
-using coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator;
 using CSharpFunctionalExtensions;
 
-namespace coIT.Clockodo.QuickActions.Lexoffice.RechnungspositionenGenerator
+namespace coIT.Toolkit.QuickActions.Lexoffice.RechnungspositionenGenerator
 {
     public partial class LexofficeRechnungspositionsGenerator : UserControl
     {

@@ -1,7 +1,6 @@
-using System.Timers;
 using Timer = System.Timers.Timer;
 
-namespace coIT.Clockodo.QuickActions
+namespace coIT.Toolkit.QuickActions
 {
     public partial class LadeForm : Form
     {

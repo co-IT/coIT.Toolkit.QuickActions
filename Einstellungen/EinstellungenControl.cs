@@ -2,13 +2,12 @@ using System.Diagnostics;
 using coIT.Libraries.Clockodo.Account;
 using coIT.Libraries.ConfigurationManager;
 using coIT.Libraries.ConfigurationManager.Cryptography;
-using coIT.Toolkit.QuickActions.Einstellungen;
 using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 using coIT.Toolkit.QuickActions.Einstellungen.DatabaseKonfiguration;
 using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
 using CSharpFunctionalExtensions;
 
-namespace coIT.Clockodo.QuickActions.Einstellungen;
+namespace coIT.Toolkit.QuickActions.Einstellungen;
 
 public partial class EinstellungenControl : UserControl
 {

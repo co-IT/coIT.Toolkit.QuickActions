@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using coIT.Libraries.Clockodo.TimeEntries;
 using coIT.Libraries.Clockodo.TimeEntries.Contracts;
-using coIT.Libraries.ConfigurationManager;
 using coIT.Libraries.LexOffice;
 using coIT.Libraries.Lexoffice.BusinessRules;
 using coIT.Libraries.Lexoffice.BusinessRules.Rechnung;
@@ -10,13 +9,11 @@ using coIT.Libraries.LexOffice.DataContracts.Invoice;
 using coIT.Libraries.Toolkit.Datengrundlagen.KundenRelation;
 using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
 using coIT.Libraries.Toolkit.Datengrundlagen.Umsatzkonten;
-using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
 using CSharpFunctionalExtensions;
-using CSharpFunctionalExtensions.ValueTasks;
 
-namespace coIT.Clockodo.QuickActions.Lexoffice
+namespace coIT.Toolkit.QuickActions.Lexoffice
 {
     public partial class LexofficeRechnungskontrolle : UserControl
     {

@@ -1,7 +1,5 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
-using coIT.Clockodo.QuickActions.Einstellungen;
-using coIT.Clockodo.QuickActions.Lexoffice;
 using coIT.Libraries.Clockodo.Account;
 using coIT.Libraries.Clockodo.Account.Contracts;
 using coIT.Libraries.Clockodo.Clock;
@@ -15,12 +13,12 @@ using coIT.Libraries.Toolkit.Datengrundlagen.Mitarbeiter;
 using coIT.Libraries.Toolkit.Datengrundlagen.Umsatzkonten;
 using coIT.Libraries.WinForms;
 using coIT.Libraries.WinForms.DateTimeButtons;
-using coIT.Toolkit.QuickActions;
 using coIT.Toolkit.QuickActions.Einstellungen;
 using coIT.Toolkit.QuickActions.Einstellungen.ClockodoKonfiguration;
 using coIT.Toolkit.QuickActions.Einstellungen.LexofficeKonfiguration;
+using coIT.Toolkit.QuickActions.Lexoffice;
 
-namespace coIT.Clockodo.QuickActions;
+namespace coIT.Toolkit.QuickActions;
 
 public partial class FormMain : Form
 {
