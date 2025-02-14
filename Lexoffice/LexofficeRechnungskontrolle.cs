@@ -22,6 +22,7 @@ public partial class LexofficeRechnungskontrolle : UserControl
   private readonly IKundeRepository _kundeRepository;
   private readonly LexofficeEinstellungen _lexofficeKonfiguration;
   private readonly IMitarbeiterRepository _mitarbeiterRepository;
+  private readonly CancellationTokenSource _cts;
 
   public LexofficeRechnungskontrolle(
     LexofficeEinstellungen lexofficeKonfiguration,
@@ -32,11 +33,55 @@ public partial class LexofficeRechnungskontrolle : UserControl
   )
   {
     InitializeComponent();
+
+    txtLexofficeClipboardHint.Visible = false;
+
     _lexofficeKonfiguration = lexofficeKonfiguration;
     _clockodoEinstellungen = clockodoEinstellungen;
     _mitarbeiterRepository = mitarbeiterRepository;
     _kundeRepository = kundeRepository;
     _kontoRepository = kontoRepository;
+
+    _cts = new CancellationTokenSource();
+
+    ObserveClipboard();
+  }
+
+  private void ObserveClipboard()
+  {
+    Task.Run(async () =>
+    {
+      while (!_cts.Token.IsCancellationRequested)
+      {
+        var staThread = new Thread(() =>
+        {
+          try
+          {
+            var clipboardText = Clipboard.GetText();
+
+            Invoke(() =>
+            {
+              txtLexofficeClipboardHint.Visible = IsLexofficeInvoiceUrl(clipboardText);
+            });
+          }
+          catch (Exception)
+          {
+            // ignored
+          }
+        });
+        staThread.SetApartmentState(ApartmentState.STA);
+        staThread.Start();
+        staThread.Join();
+
+        // Use await to properly delay:
+        await Task.Delay(1000, _cts.Token);
+      }
+    }, _cts.Token);
+  }
+
+  private static bool IsLexofficeInvoiceUrl(string url)
+  {
+    return url.StartsWith("https://app.lexoffice.de/voucher/");
   }
 
   private async void btnRechnungPrüfen_Click(object sender, EventArgs e)
@@ -153,5 +198,13 @@ public partial class LexofficeRechnungskontrolle : UserControl
       );
 
     return übereinstimmungen.Value;
+  }
+
+  private void txtLexofficeClipboardHint_Click(object sender, EventArgs e)
+  {
+    var clipboardText = Clipboard.GetText();
+
+    if (IsLexofficeInvoiceUrl(clipboardText))
+      tbxRechnungUrl.Text = clipboardText;
   }
 }
