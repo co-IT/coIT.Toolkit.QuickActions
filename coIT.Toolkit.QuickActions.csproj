@@ -8,13 +8,13 @@
     <BaseOutputPath>..\..\build\coIT.Toolkit.QuickActions</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.10.0" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.10.0"/>
     <PackageReference Include="coIT.Libraries.Clockodo" Version="1.0.0"/>
-    <PackageReference Include="coIT.Libraries.ClockodoBusinessRules" Version="1.1.1" />
-    <PackageReference Include="coIT.Libraries.ConfigurationManager" Version="1.1.1" />
-    <PackageReference Include="coIT.Libraries.LexOffice" Version="1.0.1" />
-    <PackageReference Include="coIT.Libraries.Lexoffice.BusinessRules" Version="3.0.0" />
-    <PackageReference Include="coIT.Libraries.Toolkit.Datengrundlagen" Version="3.1.0" />
+    <PackageReference Include="coIT.Libraries.ClockodoBusinessRules" Version="1.1.1"/>
+    <PackageReference Include="coIT.Libraries.ConfigurationManager" Version="1.1.1"/>
+    <PackageReference Include="coIT.Libraries.LexOffice" Version="1.0.1"/>
+    <PackageReference Include="coIT.Libraries.Lexoffice.BusinessRules" Version="3.0.0"/>
+    <PackageReference Include="coIT.Libraries.Toolkit.Datengrundlagen" Version="3.1.0"/>
     <PackageReference Include="coIT.Libraries.WinForms" Version="1.0.0"/>
     <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
