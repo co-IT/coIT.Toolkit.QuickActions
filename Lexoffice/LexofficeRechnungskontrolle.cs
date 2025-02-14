@@ -18,11 +18,11 @@ namespace coIT.Toolkit.QuickActions.Lexoffice;
 public partial class LexofficeRechnungskontrolle : UserControl
 {
   private readonly ClockodoEinstellungen _clockodoEinstellungen;
+  private readonly CancellationTokenSource _cts;
   private readonly IKontoRepository _kontoRepository;
   private readonly IKundeRepository _kundeRepository;
   private readonly LexofficeEinstellungen _lexofficeKonfiguration;
   private readonly IMitarbeiterRepository _mitarbeiterRepository;
-  private readonly CancellationTokenSource _cts;
 
   public LexofficeRechnungskontrolle(
     LexofficeEinstellungen lexofficeKonfiguration,
@@ -49,34 +49,37 @@ public partial class LexofficeRechnungskontrolle : UserControl
 
   private void ObserveClipboard()
   {
-    Task.Run(async () =>
-    {
-      while (!_cts.Token.IsCancellationRequested)
+    Task.Run(
+      async () =>
       {
-        var staThread = new Thread(() =>
+        while (!_cts.Token.IsCancellationRequested)
         {
-          try
+          var staThread = new Thread(() =>
           {
-            var clipboardText = Clipboard.GetText();
-
-            Invoke(() =>
+            try
             {
-              txtLexofficeClipboardHint.Visible = IsLexofficeInvoiceUrl(clipboardText);
-            });
-          }
-          catch (Exception)
-          {
-            // ignored
-          }
-        });
-        staThread.SetApartmentState(ApartmentState.STA);
-        staThread.Start();
-        staThread.Join();
+              var clipboardText = Clipboard.GetText();
 
-        // Use await to properly delay:
-        await Task.Delay(1000, _cts.Token);
-      }
-    }, _cts.Token);
+              Invoke(() =>
+              {
+                txtLexofficeClipboardHint.Visible = IsLexofficeInvoiceUrl(clipboardText);
+              });
+            }
+            catch (Exception)
+            {
+              // ignored
+            }
+          });
+          staThread.SetApartmentState(ApartmentState.STA);
+          staThread.Start();
+          staThread.Join();
+
+          // Use await to properly delay:
+          await Task.Delay(1000, _cts.Token);
+        }
+      },
+      _cts.Token
+    );
   }
 
   private static bool IsLexofficeInvoiceUrl(string url)

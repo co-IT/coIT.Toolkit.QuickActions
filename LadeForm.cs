@@ -4,9 +4,8 @@ namespace coIT.Toolkit.QuickActions;
 
 public partial class LadeForm : Form
 {
-  private Task _laufendeAktion;
-
   private readonly Timer _timer;
+  private Task _laufendeAktion;
 
   public LadeForm(string ladeText, Func<Task> funktion, TimeSpan timeout)
   {
