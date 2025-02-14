@@ -1,4 +1,4 @@
-name: Clockodo Quick Actions bauen und Installer sowie Update erstellen
+name: Publish
 
 on:
   push:
@@ -6,9 +6,8 @@ on:
       - '*.*.*'
 
 jobs:
-  clockodo-quickactions-installer-erstellen:
+  publish:
     runs-on: windows-latest
-    name: Clockodo Quick Actions Installer Bauen
     permissions:
       packages: write
       contents: write
@@ -23,9 +22,18 @@ jobs:
       - name: GitHub Package Manager registrieren
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/co-IT/index.json"
 
+      - name: Install Tools
+        run: dotnet tool restore
+
+      - name: Install Dependencies
+        run: dotnet restore
+
+      - name: Lint
+        run: dotnet csharpier --check .
+
       - name: Anwendung bauen
         run: dotnet publish -c Release -r win-x64 ${{ github.workspace }}\coIT.Toolkit.QuickActions.csproj --property:PublishProfile="FolderProfile"
-      
+
       - name: Installer bauen
         uses: caphyon/advinst-github-action@v2.0
         with:
@@ -38,7 +46,7 @@ jobs:
           aip-output-dir:  ${{ github.workspace }}\setup
           aip-commands: |
             SetVersion ${{github.ref_name}}
-      
+
       - name: Installer zu release hinzufügen
         uses: svenstaro/upload-release-action@v2
         with:
@@ -52,11 +60,11 @@ jobs:
           VERSION: ${{ github.ref_name }}
         run: |
           # JSON String erstellen
-          $jsonString = '{"RegistryKey":"HKUD\\Software\\\\co-IT.eu GmbH\\Clockodo QuickActions\\Version", "Version":"' + $env:VERSION + '"}'
-          
+          $jsonString = '{"RegistryKey":"HKUD\\Software\\\\co-IT.eu GmbH\\QuickActions\\Version", "Version":"' + $env:VERSION + '"}'
+
           # Datei erstellen
           $jsonString | Set-Content -Path advinst_update.json
-          
+
           # Dbug Ausgabe
           Write-Output (Resolve-Path advinst_update.json)
           Get-Content advinst_update.json
