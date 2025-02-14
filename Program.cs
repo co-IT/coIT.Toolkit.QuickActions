@@ -44,7 +44,7 @@ internal static class Program
   {
 #if DEBUG
     var appdataOrdner = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-    return Path.Combine(appdataOrdner, "co-IT.eu GmbH", "Clockodo QuickActions", "updater.exe");
+    return Path.Combine(appdataOrdner, "co-IT.eu GmbH", "QuickActions", "updater.exe");
 #else
     return Path.Combine(Application.StartupPath, "..", "updater.exe");
 #endif

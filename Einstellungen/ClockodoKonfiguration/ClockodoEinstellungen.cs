@@ -9,8 +9,8 @@ public record ClockodoEinstellungen
   public required string EmailAddress { get; init; }
 
   public TimeEntriesServiceSettings ClockodoCredentials =>
-    new(EmailAddress, ApiToken, "co-IT Clockodo Quick Actions", "info@co-it.eu");
+    new(EmailAddress, ApiToken, "co-IT Quick Actions", "info@co-it.eu");
 
   public ApiConnectionSettings CreateApiConnectionSettings =>
-    new(EmailAddress, ApiToken, "co-IT Clockodo Quick Actions", "info@co-it.eu", new Uri("https://my.clockodo.com/"));
+    new(EmailAddress, ApiToken, "co-IT Quick Actions", "info@co-it.eu", new Uri("https://my.clockodo.com/"));
 }

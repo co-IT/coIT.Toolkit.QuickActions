@@ -3,7 +3,7 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_APP_FILE" Value="[#coIT.Toolkit.QuickActions.exe]"/>
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
-    <ROW Property="AI_PRODUCTNAME_ARP" Value="Clockodo QuickActions"/>
+    <ROW Property="AI_PRODUCTNAME_ARP" Value="QuickActions"/>
     <ROW Property="AI_UNINSTALLER" Value="msiexec.exe"/>
     <ROW Property="ALLUSERS" Value="1" MultiBuildValue="DefaultBuild:"/>
     <ROW Property="ARPCOMMENTS" Value="Diese Datenbank ist korrekt und enthält nötige Daten um [|ProductName] zu installieren." ValueLocId="*"/>
@@ -20,7 +20,7 @@
     <ROW Property="Manufacturer" Value="co-IT.eu GmbH"/>
     <ROW Property="ProductCode" Value="1031:{995167C0-B3D8-41C6-B2CF-7E9B310E5D8D} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
-    <ROW Property="ProductName" Value="Clockodo QuickActions"/>
+    <ROW Property="ProductName" Value="QuickActions"/>
     <ROW Property="ProductVersion" Value="0.0.1" Options="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{601DCD2B-330D-4EA1-9C29-B1F5E161F80F}"/>
@@ -61,11 +61,11 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
     <ROW File="updater.exe" Component_="updater.exe" FileName="updater.exe" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_STUBS&gt;updater.exe" SelfReg="false" DigSign="true"/>
-    <ROW File="coIT.Toolkit.QuickActions.exe" Component_="coIT.Toolkit.QuickActions.exe" FileName="COITTO~1.EXE|coIT.Toolkit.QuickActions.exe" Attributes="0" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\coIT.Toolkit.QuickActions.exe" SelfReg="false" DigSign="true"/>
-    <ROW File="coIT.Toolkit.QuickActions.pdb" Component_="coIT.Toolkit.QuickActions.exe" FileName="COITTO~1.PDB|coIT.Toolkit.QuickActions.pdb" Attributes="0" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\coIT.Toolkit.QuickActions.pdb" SelfReg="false"/>
-    <ROW File="installer_banner.jpg" Component_="installer_banner.jpg" FileName="INSTAL~1.JPG|installer_banner.jpg" Attributes="0" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\img\installer_banner.jpg" SelfReg="false"/>
-    <ROW File="installer_dialog.jpg" Component_="installer_banner.jpg" FileName="INSTAL~2.JPG|installer_dialog.jpg" Attributes="0" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\img\installer_dialog.jpg" SelfReg="false"/>
-    <ROW File="program_icon.ico" Component_="installer_banner.jpg" FileName="PROGRA~1.ICO|program_icon.ico" Attributes="0" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\img\program_icon.ico" SelfReg="false"/>
+    <ROW File="coIT.Toolkit.QuickActions.exe" Component_="coIT.Toolkit.QuickActions.exe" FileName="COITTO~1.EXE|coIT.Toolkit.QuickActions.exe" Attributes="0" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\coIT.Toolkit.QuickActions.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="coIT.Toolkit.QuickActions.pdb" Component_="coIT.Toolkit.QuickActions.exe" FileName="COITTO~1.PDB|coIT.Toolkit.QuickActions.pdb" Attributes="0" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\coIT.Toolkit.QuickActions.pdb" SelfReg="false"/>
+    <ROW File="installer_banner.jpg" Component_="installer_banner.jpg" FileName="INSTAL~1.JPG|installer_banner.jpg" Attributes="0" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\img\installer_banner.jpg" SelfReg="false"/>
+    <ROW File="installer_dialog.jpg" Component_="installer_banner.jpg" FileName="INSTAL~2.JPG|installer_dialog.jpg" Attributes="0" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\img\installer_dialog.jpg" SelfReg="false"/>
+    <ROW File="program_icon.ico" Component_="installer_banner.jpg" FileName="PROGRA~1.ICO|program_icon.ico" Attributes="0" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\img\program_icon.ico" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
@@ -93,8 +93,8 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
     <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
-    <ROW Name="installer_banner.jpg" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\img\installer_banner.jpg"/>
-    <ROW Name="installer_dialog.jpg" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\img\installer_dialog.jpg"/>
+    <ROW Name="installer_banner.jpg" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\img\installer_banner.jpg"/>
+    <ROW Name="installer_dialog.jpg" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\img\installer_dialog.jpg"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiControlComponent">
     <ROW Dialog_="WelcomeDlg" Control="WelcomeDlgDialogInitializer" Type="DialogInitializer" X="0" Y="0" Width="0" Height="0" Attributes="0" Order="-1" TextLocId="-" HelpLocId="-" ExtDataLocId="-"/>
@@ -159,7 +159,7 @@
     <ROW Feature_="MainFeature" Component_="installer_banner.jpg"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
-    <ROW Name="program_icon.exe" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64\img\program_icon.ico" Index="0"/>
+    <ROW Name="program_icon.exe" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64\img\program_icon.ico" Index="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIniFileComponent">
     <ROW IniFile="AppDir" FileName="updater.ini" DirProperty="APPDIR" Section="General" Key="AppDir" Value="[APPDIR]" Action="0" Component_="updater.exe"/>
@@ -241,7 +241,7 @@
     <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SynchronizedFolderComponent">
-    <ROW Directory_="NeuesVerzeichnis_Dir" SourcePath="build\TimeEntriesValidator\Release\net8.0-windows8.0\publish\win-x64" Feature="MainFeature" ExcludePattern="*~|#*#|%*%|._|CVS|.cvsignore|SCCS|vssver.scc|mssccprj.scc|vssver2.scc|.svn|.DS_Store" ExcludeFlags="6" FileAddOptions="4"/>
+    <ROW Directory_="NeuesVerzeichnis_Dir" SourcePath="build\QuickActions\Release\net8.0-windows8.0\publish\win-x64" Feature="MainFeature" ExcludePattern="*~|#*#|%*%|._|CVS|.cvsignore|SCCS|vssver.scc|mssccprj.scc|vssver2.scc|.svn|.DS_Store" ExcludeFlags="6" FileAddOptions="4"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.UpdaterComponent">
     <ROW Updater="updater.exe" URL="URL" SearchFreq="CheckFrequency" DownloadsFolder="DownloadsFolder" ID="ID" TargetDir="AppDir" AppName="ApplicationName" AppVersion="ApplicationVersion" CompanyName="CompanyName" DefCommandLine="DefaultCommandLine" Flags="Flags" IconIndex="0" UnistallCASeq="AI_UPDATER_UNINSTALL" Description="[|UpdaterName] [|ProductVersion]"/>
