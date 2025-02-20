@@ -31,9 +31,6 @@ public partial class EinstellungenControl : UserControl
   internal event EinstellungenGeladenEventHandler EinstellungenErfolreichGeladen;
   internal event EventHandler EinstellungenKonntenNichtGeladenWerden;
 
-  internal event EventHandler EinstellungenAktualisierungStart;
-  internal event EventHandler EinstellungenAktualisierungEnde;
-
   public void Laden()
   {
     EinstellungenLaden();
@@ -123,10 +120,8 @@ public partial class EinstellungenControl : UserControl
 
   private async void btnClockdoEinstellungenSpeichern_Click(object sender, EventArgs e)
   {
-    EinstellungenAktualisierungStart?.Invoke(this, EventArgs.Empty);
     await ClockodoEinstellungenPrüfenUndSpeichern();
 
-    EinstellungenAktualisierungEnde.Invoke(this, EventArgs.Empty);
     EinstellungenLaden();
   }
 
