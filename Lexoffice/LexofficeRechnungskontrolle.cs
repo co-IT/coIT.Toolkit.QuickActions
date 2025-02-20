@@ -84,7 +84,7 @@ public partial class LexofficeRechnungskontrolle : UserControl
 
   private static bool IsLexofficeInvoiceUrl(string url)
   {
-    return url.StartsWith("https://app.lexoffice.de/voucher/");
+    return url.StartsWith("https://app.lexoffice.de/voucher");
   }
 
   private async void btnRechnungPrüfen_Click(object sender, EventArgs e)
@@ -142,7 +142,7 @@ public partial class LexofficeRechnungskontrolle : UserControl
       );
   }
 
-  private async Task<Result> RechnungÜberprüfen(Invoice rechnung, IchPrüfe<Invoice> prüfer)
+  private static Result RechnungÜberprüfen(Invoice rechnung, IchPrüfe<Invoice> prüfer)
   {
     return prüfer.Prüfen(rechnung);
   }
@@ -184,9 +184,9 @@ public partial class LexofficeRechnungskontrolle : UserControl
     return await _kundeRepository.GetAll().Map(kundenstamm => kundenstamm.ToImmutableList());
   }
 
-  private Result<string> RechnungsIdAuslesen(string text)
+  private static Result<string> RechnungsIdAuslesen(string text)
   {
-    var valideIdRegex = new Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+    var valideIdRegex = InvoiceIdRegex();
 
     var valideIdÜbereinstimmungen = valideIdRegex.Match(text);
     if (!valideIdÜbereinstimmungen.Success)
@@ -210,4 +210,7 @@ public partial class LexofficeRechnungskontrolle : UserControl
     if (IsLexofficeInvoiceUrl(clipboardText))
       tbxRechnungUrl.Text = clipboardText;
   }
+
+  [GeneratedRegex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")]
+  private static partial Regex InvoiceIdRegex();
 }
