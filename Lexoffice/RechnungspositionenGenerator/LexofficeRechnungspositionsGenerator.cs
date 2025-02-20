@@ -34,6 +34,7 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
     await MitarbeiterListeLaden();
 
     btnPositionErstellen.Enabled = true;
+    btn_Copy.Enabled = false;
   }
 
   private async Task MitarbeiterListeLaden()
@@ -78,15 +79,18 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
     if (rechnungsPositionErgebnis.IsSuccess)
     {
       tbxErstelltePosition.Text = rechnungsPositionErgebnis.Value;
+      btn_Copy.Enabled = true;
       return;
     }
 
     MessageBox.Show(
       rechnungsPositionErgebnis.Error,
-      "Fehler bei der Erstellunge",
+      "Fehler bei der Positionserstellung",
       MessageBoxButtons.OK,
       MessageBoxIcon.Error
     );
+    tbxErstelltePosition.Text = string.Empty;
+    btn_Copy.Enabled = false;
   }
 
   private Result<string> KundeAuslesen()
@@ -107,8 +111,6 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
 
   private Result<Mitarbeiter> MitarbeiterAuslesen()
   {
-    var test = lbxLeistung.SelectedItem;
-
     return Maybe
       .From(lbxMitarbeiter.SelectedItem)
       .ToResult("Bitte wähle zuerst einen Mitarbeiter aus")
@@ -122,7 +124,7 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
       .Ensure(titel => !string.IsNullOrWhiteSpace(titel), "Bitte gebe einen Titel für diese Position an");
   }
 
-  private Result<int> KontoNummerErmitteln(string kunde, string leistung)
+  private static Result<int> KontoNummerErmitteln(string kunde, string leistung)
   {
     return (kunde, leistung) switch
     {
@@ -150,5 +152,10 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
 
     lbxMitarbeiter.Items.Clear();
     lbxMitarbeiter.Items.AddRange(mitarbeiter.ToArray());
+  }
+
+  private void btn_Copy_Click(object sender, EventArgs e)
+  {
+    Clipboard.SetText(tbxErstelltePosition.Text);
   }
 }
