@@ -22,7 +22,7 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace coIT.Toolkit.QuickActions;
 
-public partial class FormMain : Form
+public sealed partial class FormMain : Form
 {
   private AccountInformation _accountInformation;
   private ClockodoEinstellungen _clockodoSettings;
@@ -38,6 +38,7 @@ public partial class FormMain : Form
     InitializeComponent();
 
     dgvClockodoFehler.CellFormatting += dgvClockodoFehler_CellFormatting;
+    Text = $"{Text} | {Application.ProductVersion.Split("+").First()}";
   }
 
   private void EinstellungenEingebenErzwingen(object? sender, EventArgs e)
