@@ -42,7 +42,7 @@ public partial class FormMain : Form
 
   private void EinstellungenEingebenErzwingen(object? sender, EventArgs e)
   {
-    TabStatusSetzen(false);
+    FeatureTabStatusSetzen(false);
     tbcForms.SelectedTab = tabEinstellungen;
   }
 
@@ -60,13 +60,16 @@ public partial class FormMain : Form
     DatenNeuladen();
     await LexofficeTabLaden();
     UhrAktualisierungsTimerStarten();
-    TabStatusSetzen(true, true);
+    FeatureTabStatusSetzen(true);
   }
 
   private async void FormMain_Load(object sender, EventArgs e)
   {
     Visible = false;
     KonfigurationManagerLaden();
+
+    FeatureTabStatusSetzen(false);
+
     await EinstellungenLaden();
 
     // Wird derzeit nicht benötigt und würde Anwender verwirren
@@ -100,20 +103,19 @@ public partial class FormMain : Form
     einstellungenControl.Dock = DockStyle.Fill;
     einstellungenControl.EinstellungenErfolreichGeladen += EinstellungenSetzen;
     einstellungenControl.EinstellungenKonntenNichtGeladenWerden += EinstellungenEingebenErzwingen;
-    einstellungenControl.EinstellungenAktualisierungStart += (_, _) => TabStatusSetzen(false, true);
-    einstellungenControl.EinstellungenAktualisierungEnde += (_, _) => TabStatusSetzen(true, true);
     einstellungenControl.Laden();
-
-    UhrAktualisierungsTimerStarten();
   }
 
-  private void TabStatusSetzen(bool status, bool settingsAuchBlockieren = false)
+  private void FeatureTabStatusSetzen(bool status)
   {
+    tbpClockodoSelbstkontrolle.Visible = status;
+    tbpClockodoSelbstkontrolle.Enabled = status;
+    tbpLexoffice.Visible = status;
+    tbpLexoffice.Enabled = status;
+    tbpErfassen.Visible = status;
     tbpErfassen.Enabled = status;
+    tbpClockodo.Visible = status;
     tbpClockodo.Enabled = status;
-
-    if (settingsAuchBlockieren)
-      tabEinstellungen.Enabled = status;
   }
 
   private void KonfigurationManagerLaden()
@@ -184,8 +186,6 @@ public partial class FormMain : Form
 
       ctrl_Zeiteintraege.ConfigureWithDefaultBehaviour();
       ctrl_Zeiteintraege.DataSource = historischeZeiteinträge;
-      // ctrl_Zeiteintraege.Columns["serviceID"].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
-      // ctrl_Zeiteintraege.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
 
       if (ctrl_Zeiteintraege.Columns.Count > 0)
       {
