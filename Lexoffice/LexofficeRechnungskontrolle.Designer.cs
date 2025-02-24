@@ -52,7 +52,7 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       // btnRechnungPrüfen
       // 
       btnRechnungPrüfen.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      btnRechnungPrüfen.Location = new Point(816, 73);
+      btnRechnungPrüfen.Location = new Point(816, 68);
       btnRechnungPrüfen.Margin = new Padding(4, 5, 4, 5);
       btnRechnungPrüfen.Name = "btnRechnungPrüfen";
       btnRechnungPrüfen.Size = new Size(247, 30);
@@ -108,18 +108,18 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       groupBox2.Margin = new Padding(4, 5, 4, 5);
       groupBox2.Name = "groupBox2";
       groupBox2.Padding = new Padding(4, 5, 4, 5);
-      groupBox2.Size = new Size(1120, 426);
+      groupBox2.Size = new Size(1120, 421);
       groupBox2.TabIndex = 3;
       groupBox2.TabStop = false;
       groupBox2.Text = "Ergebnisse der Prüfung";
       // 
       // lblErgebnisse
       // 
-      lblErgebnisse.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-      lblErgebnisse.Location = new Point(31, 38);
+      lblErgebnisse.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+      lblErgebnisse.Location = new Point(8, 38);
       lblErgebnisse.Margin = new Padding(4, 0, 4, 0);
       lblErgebnisse.Name = "lblErgebnisse";
-      lblErgebnisse.Size = new Size(1072, 282);
+      lblErgebnisse.Size = new Size(1104, 378);
       lblErgebnisse.TabIndex = 0;
       // 
       // LexofficeRechnungskontrolle
