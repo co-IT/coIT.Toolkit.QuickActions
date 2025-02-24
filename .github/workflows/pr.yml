@@ -35,7 +35,7 @@ jobs:
       - name: Installer bauen
         uses: caphyon/advinst-github-action@v2.0
         with:
-          advinst-version: '21.9'
+          advinst-version: '22.1'
           advinst-license: ${{ secrets.ADVINST_LICENSE_KEY }}
           advinst-enable-automation: 'true'
           aip-path: ${{ github.workspace }}\coIT.Toolkit.QuickActions.Installer.aip
@@ -50,7 +50,7 @@ jobs:
           VERSION: 0.0.0
         run: |
           # JSON String erstellen
-          $jsonString = '{"RegistryKey":"HKUD\\Software\\\\co-IT.eu GmbH\\QuickActions\\Version", "Version":"' + $env:VERSION + '"}'
+          $jsonString = '{"RegistryKey":"HKUD\\Software\\co-IT.eu GmbH\\coIT.Toolkit.QuickActions\\Version", "Version":"' + $env:VERSION + '"}'
 
           # Datei erstellen
           $jsonString | Set-Content -Path advinst_update.json
