@@ -70,11 +70,11 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
       .BindZip(_ => LeistungAuslesen())
       .Bind(kundeUndLeistung => KontoNummerErmitteln(kundeUndLeistung.First, kundeUndLeistung.Second))
       .BindZip(_ => MitarbeiterAuslesen())
-      .BindZip((_, _) => BeschreibungAuslesen())
       .Map(
-        ((int Konto, Mitarbeiter mitarbeiter, string beschreibung) zeilenwerte) =>
-          $"{zeilenwerte.Konto}-{zeilenwerte.mitarbeiter.Nummer}: {zeilenwerte.beschreibung}"
-      );
+        ((int Konto, Mitarbeiter Mitarbeiter) zeilenwerte) =>
+          $"{zeilenwerte.Konto}-{zeilenwerte.Mitarbeiter.Nummer}"
+      )
+      .MapIf(!string.IsNullOrWhiteSpace(tbxTitelDerPosition.Text), position => $"{position}: {tbxTitelDerPosition.Text}");
 
     if (rechnungsPositionErgebnis.IsSuccess)
     {
@@ -117,11 +117,10 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
       .Map(mitarbeiterAlsObjekt => (Mitarbeiter)mitarbeiterAlsObjekt!);
   }
 
-  private Result<string> BeschreibungAuslesen()
+  private Result<string> TitelAuslesen()
   {
     return Result
-      .Success(tbxTitelDerPosition.Text)
-      .Ensure(titel => !string.IsNullOrWhiteSpace(titel), "Bitte gebe einen Titel für diese Position an");
+      .Of(tbxTitelDerPosition.Text);
   }
 
   private static Result<int> KontoNummerErmitteln(string kunde, string leistung)
