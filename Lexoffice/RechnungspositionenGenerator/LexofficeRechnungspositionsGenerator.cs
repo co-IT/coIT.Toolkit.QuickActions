@@ -71,10 +71,12 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
       .Bind(kundeUndLeistung => KontoNummerErmitteln(kundeUndLeistung.First, kundeUndLeistung.Second))
       .BindZip(_ => MitarbeiterAuslesen())
       .Map(
-        ((int Konto, Mitarbeiter Mitarbeiter) zeilenwerte) =>
-          $"{zeilenwerte.Konto}-{zeilenwerte.Mitarbeiter.Nummer}"
+        ((int Konto, Mitarbeiter Mitarbeiter) zeilenwerte) => $"{zeilenwerte.Konto}-{zeilenwerte.Mitarbeiter.Nummer}"
       )
-      .MapIf(!string.IsNullOrWhiteSpace(tbxTitelDerPosition.Text), position => $"{position}: {tbxTitelDerPosition.Text}");
+      .MapIf(
+        !string.IsNullOrWhiteSpace(tbxTitelDerPosition.Text),
+        position => $"{position}: {tbxTitelDerPosition.Text}"
+      );
 
     if (rechnungsPositionErgebnis.IsSuccess)
     {
@@ -119,8 +121,7 @@ public partial class LexofficeRechnungspositionsGenerator : UserControl
 
   private Result<string> TitelAuslesen()
   {
-    return Result
-      .Of(tbxTitelDerPosition.Text);
+    return Result.Of(tbxTitelDerPosition.Text);
   }
 
   private static Result<int> KontoNummerErmitteln(string kunde, string leistung)
