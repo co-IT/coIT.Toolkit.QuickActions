@@ -14,7 +14,8 @@ internal static class Program
 
     // To customize application configuration such as set high DPI settings or default font,
     // see https://aka.ms/applicationconfiguration.
-    if (updatesWurdenGefundenUndWerdenDurchgeführt) return;
+    if (updatesWurdenGefundenUndWerdenDurchgeführt)
+      return;
 
     ApplicationConfiguration.Initialize();
     Application.Run(new FormMain());
@@ -24,7 +25,8 @@ internal static class Program
   {
     var updaterPfad = ErwarteterPfadFürUpdater();
 
-    if (!File.Exists(updaterPfad)) return false;
+    if (!File.Exists(updaterPfad))
+      return false;
 
     var process = Process.Start(updaterPfad);
     process.WaitForExit();
@@ -34,8 +36,8 @@ internal static class Program
     // Updater exit code 0 bedeutet, dass Updates gefunden wurden
     // https://www.advancedinstaller.com/user-guide/updater.html#section370
     var updateGefundenExitCode = 0;
-    return code == updateGefundenExitCode;
 
+    return code == updateGefundenExitCode;
   }
 
   private static string ErwarteterPfadFürUpdater()
