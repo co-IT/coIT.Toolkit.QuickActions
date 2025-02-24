@@ -5,7 +5,8 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <BaseOutputPath>..\..\build\coIT.Toolkit.QuickActions</BaseOutputPath>
+    <BaseOutputPath>.\build\coIT.Toolkit.QuickActions</BaseOutputPath>
+    <ApplicationIcon>./img/program_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.10.0"/>
