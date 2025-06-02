@@ -84,7 +84,7 @@ public partial class LexofficeRechnungskontrolle : UserControl
 
   private static bool IsLexofficeInvoiceUrl(string url)
   {
-    return url.StartsWith("https://app.lexoffice.de/voucher");
+    return url.StartsWith("https://app.lexware.de/voucher");
   }
 
   private async void btnRechnungPrüfen_Click(object sender, EventArgs e)

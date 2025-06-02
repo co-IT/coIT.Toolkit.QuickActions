@@ -38,19 +38,19 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       groupBox1.SuspendLayout();
       groupBox2.SuspendLayout();
       SuspendLayout();
-      // 
+      //
       // tbxRechnungUrl
-      // 
+      //
       tbxRechnungUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       tbxRechnungUrl.Location = new Point(31, 68);
       tbxRechnungUrl.Margin = new Padding(4, 5, 4, 5);
       tbxRechnungUrl.Name = "tbxRechnungUrl";
-      tbxRechnungUrl.PlaceholderText = "https://app.lexoffice.de/voucher/#/########-####-####-####-############";
+      tbxRechnungUrl.PlaceholderText = "https://app.lexware.de/voucher/#/########-####-####-####-############";
       tbxRechnungUrl.Size = new Size(777, 30);
       tbxRechnungUrl.TabIndex = 0;
-      // 
+      //
       // btnRechnungPrüfen
-      // 
+      //
       btnRechnungPrüfen.Anchor = AnchorStyles.Top | AnchorStyles.Right;
       btnRechnungPrüfen.Location = new Point(816, 68);
       btnRechnungPrüfen.Margin = new Padding(4, 5, 4, 5);
@@ -60,9 +60,9 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       btnRechnungPrüfen.Text = "Rechnung prüfen";
       btnRechnungPrüfen.UseVisualStyleBackColor = true;
       btnRechnungPrüfen.Click += btnRechnungPrüfen_Click;
-      // 
+      //
       // groupBox1
-      // 
+      //
       groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       groupBox1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
       groupBox1.Controls.Add(txtLexofficeClipboardHint);
@@ -77,9 +77,9 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       groupBox1.TabIndex = 2;
       groupBox1.TabStop = false;
       groupBox1.Text = "URL der zu prüfenden Rechnung einfügen";
-      // 
+      //
       // txtLexofficeClipboardHint
-      // 
+      //
       txtLexofficeClipboardHint.Cursor = Cursors.Hand;
       txtLexofficeClipboardHint.Font = new Font("Segoe UI", 8.25F, FontStyle.Underline, GraphicsUnit.Point, 0);
       txtLexofficeClipboardHint.ForeColor = SystemColors.HotTrack;
@@ -89,18 +89,18 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       txtLexofficeClipboardHint.TabIndex = 3;
       txtLexofficeClipboardHint.Text = "Lexoffice URL in Zwischenablage erkannt! Klicke hier, um sie einzufügen.";
       txtLexofficeClipboardHint.Click += txtLexofficeClipboardHint_Click;
-      // 
+      //
       // label1
-      // 
+      //
       label1.AutoSize = true;
       label1.Location = new Point(31, 40);
       label1.Name = "label1";
       label1.Size = new Size(554, 23);
       label1.TabIndex = 2;
       label1.Text = "Bitte stelle sicher, dass die Rechnung zuerst zwischengespeichert wurde";
-      // 
+      //
       // groupBox2
-      // 
+      //
       groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       groupBox2.AutoSizeMode = AutoSizeMode.GrowAndShrink;
       groupBox2.Controls.Add(lblErgebnisse);
@@ -112,18 +112,18 @@ namespace coIT.Toolkit.QuickActions.Lexoffice
       groupBox2.TabIndex = 3;
       groupBox2.TabStop = false;
       groupBox2.Text = "Ergebnisse der Prüfung";
-      // 
+      //
       // lblErgebnisse
-      // 
+      //
       lblErgebnisse.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
       lblErgebnisse.Location = new Point(8, 38);
       lblErgebnisse.Margin = new Padding(4, 0, 4, 0);
       lblErgebnisse.Name = "lblErgebnisse";
       lblErgebnisse.Size = new Size(1104, 378);
       lblErgebnisse.TabIndex = 0;
-      // 
+      //
       // LexofficeRechnungskontrolle
-      // 
+      //
       AutoScaleDimensions = new SizeF(9F, 23F);
       AutoScaleMode = AutoScaleMode.Font;
       AutoSizeMode = AutoSizeMode.GrowAndShrink;
